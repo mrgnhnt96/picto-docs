@@ -1,0 +1,1677 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <base href="/"/>
+    <meta charset="utf-8"/>
+    <title>Errors</title>
+    <meta property="og:title" content="Errors"/>
+    <meta name="description" content="How an uncaught error starts a recording or bounds the one already running, what the capture window around the error keeps, and where Picto stands down."/>
+    <meta property="og:description" content="How an uncaught error starts a recording or bounds the one already running, what the capture window around the error keeps, and where Picto stands down."/>
+    <style>
+      .docs .header-container {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 10;
+        backdrop-filter: blur(8px);
+      }
+      .docs .main-container {
+        padding: 0;
+        margin-left: auto;
+        margin-right: auto;
+      }
+      @media all and (min-width: 768px) {
+        .docs .main-container {
+          padding-left: 1.25rem;
+          padding-right: 1.25rem;
+        }
+      }
+      .docs .main-container .sidebar-barrier {
+        position: absolute;
+        z-index: 9;
+        opacity: 0.0;
+        pointer-events: none;
+        background-color: var(--background);
+        inset: 0;
+      }
+      .docs .main-container .sidebar-barrier:has(+ .sidebar-container.open) {
+        opacity: 0.5;
+        pointer-events: auto;
+      }
+      .docs .main-container .sidebar-container {
+        position: fixed;
+        top: 4rem;
+        bottom: 0;
+        z-index: 10;
+        width: 17rem;
+        overflow-y: auto;
+        transition: transform 150ms ease-in-out;
+        transform: translateX(-100%);
+      }
+      @media all and (min-width: 768px) {
+        .docs .main-container .sidebar-container {
+          margin-left: -1.25rem;
+        }
+      }
+      @media all and (min-width: 1024px) {
+        .docs .main-container .sidebar-container {
+          margin-left: 0;
+          transform: translateX(0);
+        }
+      }
+      @media all and (max-width: 1023px) {
+        .docs .main-container .sidebar-container {
+          position: fixed;
+          top: 0;
+          border-right-style: solid;
+          border-right-color: #0000000d;
+          border-right-width: 1px;
+          background-color: var(--background);
+        }
+      }
+      .docs .main-container .sidebar-container.open {
+        transform: translateX(0);
+      }
+      .docs .main-container main {
+        position: relative;
+        padding-top: 4rem;
+      }
+      @media all and (min-width: 1024px) {
+        .docs .main-container main {
+          padding-left: 17rem;
+        }
+      }
+      .docs .main-container main > div {
+        display: flex;
+        padding-top: 2rem;
+        padding-left: 1rem;
+        padding-right: 1rem;
+        justify-content: center;
+      }
+      @media all and (min-width: 1024px) {
+        .docs .main-container main > div {
+          padding-left: 4rem;
+        }
+      }
+      .docs .main-container main > div .content-container {
+        min-width: 0;
+        max-width: 80rem;
+        padding-right: 0;
+        flex-grow: 1;
+        flex-shrink: 1;
+        flex-basis: 0%;
+      }
+      @media all and (min-width: 1280px) {
+        .docs .main-container main > div .content-container {
+          padding-right: 3rem;
+        }
+      }
+      .docs .main-container main > div .content-container .content-header {
+        margin-bottom: 2rem;
+        color: var(--content-headings);
+      }
+      .docs .main-container main > div .content-container .content-header h1 {
+        font-size: 2rem;
+        line-height: 2.25rem;
+      }
+      .docs .main-container main > div .content-container .content-header p {
+        margin-top: 0.75rem;
+        font-size: 1.25rem;
+        line-height: 1.25rem;
+      }
+      .docs .main-container main > div .content-container .content-header img {
+        margin-top: 1rem;
+        border-radius: 0.375rem;
+      }
+      .docs .main-container main > div .content-container .content-footer {
+        margin-top: 2rem;
+      }
+      .docs .main-container main > div aside.toc {
+        display: none;
+        position: relative;
+        width: 17rem;
+      }
+      @media all and (min-width: 1280px) {
+        .docs .main-container main > div aside.toc {
+          display: block;
+        }
+      }
+      .docs .main-container main > div aside.toc > div {
+        position: sticky;
+        top: 6rem;
+      }
+      .docs .main-container main > div aside.toc h3 {
+        margin-bottom: 0.5rem;
+        opacity: 0.75;
+        font-size: 0.875rem;
+        font-weight: 600;
+        line-height: 1.25rem;
+      }
+      .docs .main-container main > div aside.toc ul {
+        margin-top: 1rem;
+      }
+      .docs .main-container main > div aside.toc li {
+        margin-top: 0.5rem;
+        font-size: 14px;
+      }
+    </style>
+    <script>
+      !function(t,e){var o,n,p,r;e.__SV||(window.posthog=e,e._i=[],e.init=function(i,s,a){function g(t,e){var o=e.split(".");2==o.length&&(t=t[o[0]],e=o[1]),t[e]=function(){t.push([e].concat(Array.prototype.slice.call(arguments,0)))}}(p=t.createElement("script")).type="text/javascript",p.crossOrigin="anonymous",p.async=!0,p.src=s.api_host.replace(".i.posthog.com","-assets.i.posthog.com")+"/static/array.js",(r=t.getElementsByTagName("script")[0]).parentNode.insertBefore(p,r);var u=e;for(void 0!==a?u=e[a]=[]:a="posthog",u.people=u.people||[],u.toString=function(t){var e="posthog";return"posthog"!==a&&(e+="."+a),t||(e+=" (stub)"),e},u.people.toString=function(){return u.toString(1)+".people (stub)"},o="init capture register register_once register_for_session unregister unregister_for_session getFeatureFlag getFeatureFlagPayload isFeatureEnabled reloadFeatureFlags updateEarlyAccessFeatureEnrollment getEarlyAccessFeatures on onFeatureFlags onSessionId getSurveys getActiveMatchingSurveys renderSurvey canRenderSurvey identify setPersonProperties group resetGroups setPersonPropertiesForFlags resetPersonPropertiesForFlags setGroupPropertiesForFlags resetGroupPropertiesForFlags reset get_distinct_id getGroups get_session_id get_session_replay_url alias set_config startSessionRecording stopSessionRecording sessionRecordingStarted captureException loadToolbar get_property getSessionProperty createPersonProfile opt_in_capturing opt_out_capturing has_opted_in_capturing has_opted_out_capturing clear_opt_in_out_capturing debug getPageViewId captureTraceFeedback captureTraceMetric".split(" "),n=0;n<o.length;n++)g(u,o[n]);e._i.push([i,s,a])},e.__SV=1)}(document,window.posthog||[]);
+      posthog.init('phc_JvQSPxWXO7nPNdqPEp1i1341AblCBRWZRpS0kKWRheu', {
+        api_host: 'https://us.i.posthog.com',
+        disable_session_recording: true,
+      });
+      
+    </script>
+    <link type="image/svg+xml" href="/favicon.svg" rel="icon"/>
+    <link type="image/png" sizes="32x32" href="/icons/favicon-32.png" rel="icon"/>
+    <link type="image/png" sizes="16x16" href="/icons/favicon-16.png" rel="icon"/>
+    <link href="/icons/icon-180.png" rel="apple-touch-icon"/>
+    <link href="/favicon.ico" rel="alternate icon"/>
+    <style>
+      .docs .content-header p {
+        opacity: 0.75;
+        line-height: 1.6em;
+      }
+      .breadcrumbs {
+        display: flex;
+        margin-bottom: 0.625rem;
+        opacity: 0.6;
+        column-gap: 0.5rem;
+        font-size: 0.8125rem;
+      }
+      .breadcrumbs a {
+        color: inherit;
+        text-decoration: none;
+      }
+      .breadcrumbs a:hover {
+        text-decoration: underline;
+      }
+      .breadcrumbs .breadcrumb-sep {
+        opacity: 0.5;
+      }
+      .page-nav {
+        display: flex;
+        padding-top: 1.5rem;
+        margin-top: 3rem;
+        border-top-style: solid;
+        border-top-color: color-mix(in srgb, currentColor 12%, transparent);
+        border-top-width: 1px;
+        justify-content: space-between;
+        column-gap: 1rem;
+      }
+      .page-nav .page-nav-link {
+        display: flex;
+        max-width: 48%;
+        padding: 0.75rem 1rem;
+        border: solid color-mix(in srgb, currentColor 12%, transparent) 1px;
+        border-radius: 10px;
+        transition: all 150ms ease-in-out;
+        flex-direction: column;
+        row-gap: 0.125rem;
+        color: inherit;
+        text-decoration: none;
+      }
+      .page-nav .page-nav-link:hover {
+        border: solid color-mix(in srgb, currentColor 28%, transparent) 1px;
+        background-color: color-mix(in srgb, currentColor 4%, transparent);
+      }
+      .page-nav .page-nav-link .page-nav-label {
+        opacity: 0.55;
+        font-size: 0.6875rem;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+      }
+      .page-nav .page-nav-link .page-nav-title {
+        color: var(--primary);
+        font-size: 0.9375rem;
+        font-weight: 600;
+      }
+      .page-nav .page-nav-next {
+        margin-left: auto;
+        text-align: right;
+      }
+    </style>
+    <!--$-->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <style>
+      .header {
+        display: flex;
+        height: 4rem;
+        padding: 0.25rem 1rem;
+        margin-left: auto;
+        margin-right: auto;
+        border-bottom-style: solid;
+        border-bottom-color: #0000000d;
+        border-bottom-width: 1px;
+        align-items: center;
+        column-gap: 1rem;
+      }
+      @media all and (min-width: 768px) {
+        .header {
+          padding-left: 2.5rem;
+          padding-right: 2.5rem;
+        }
+      }
+      .header .header-title {
+        display: inline-flex;
+        align-items: center;
+        column-gap: 0.75rem;
+        flex-basis: 17rem;
+      }
+      .header .header-title img {
+        width: auto;
+        height: 1.5rem;
+      }
+      .header .header-title span {
+        font-weight: 700;
+      }
+      .header .header-content {
+        display: flex;
+        justify-content: end;
+        flex-grow: 1;
+      }
+      .header .header-items {
+        display: flex;
+        column-gap: 0.25rem;
+      }
+    </style>
+    <style>
+      .sidebar-toggle-button {
+        display: none;
+        width: 2rem;
+        height: 2rem;
+        justify-content: center;
+        align-items: center;
+      }
+      @media all and (max-width: 1024px) {
+        [data-has-sidebar] .sidebar-toggle-button {
+          display: flex;
+        }
+      }
+    </style>
+    <style>
+      .search-trigger {
+        display: flex;
+        height: 2rem;
+        padding-left: 0.7rem;
+        padding-right: 0.7rem;
+        border: solid color-mix(in srgb, currentColor 15%, transparent) 1px;
+        border-radius: 8px;
+        opacity: 0.8;
+        cursor: pointer;
+        transition: all 150ms ease-in-out;
+        align-items: center;
+        column-gap: 0.5rem;
+        color: inherit;
+        font-size: 0.8125rem;
+        background-color: transparent;
+      }
+      .search-trigger:hover {
+        opacity: 1.0;
+        background-color: color-mix(in srgb, currentColor 6%, transparent);
+      }
+      .search-trigger .search-trigger-label {
+        display: none;
+      }
+      .search-trigger .search-trigger-keys {
+        display: none;
+        opacity: 0.7;
+        font-family: monospace;
+        font-size: 0.6875rem;
+      }
+      @media all and (min-width: 640px) {
+        .search-trigger {
+          width: 12rem;
+          justify-content: start;
+        }
+        .search-trigger .search-trigger-label {
+          display: block;
+        }
+        .search-trigger .search-trigger-keys {
+          display: block;
+          margin-left: auto;
+        }
+      }
+      .search-dialog {
+        display: none;
+        width: 100%;
+        height: 100%;
+        max-width: initial;
+        max-height: initial;
+        padding: 3rem 1rem;
+        margin: 0;
+        border: none;
+        overflow: hidden;
+        color: inherit;
+        background-color: transparent;
+      }
+      .search-dialog[open] {
+        display: flex;
+        justify-content: center;
+        align-items: start;
+      }
+      .search-dialog::backdrop {
+        background-color: rgba(15, 23, 42, .45);
+        backdrop-filter: blur(4px);
+      }
+      @media all and (min-width: 768px) {
+        .search-dialog {
+          padding: 6rem 1rem 3rem 1rem;
+        }
+      }
+      .search-panel {
+        display: flex;
+        width: 100%;
+        max-width: 40rem;
+        max-height: 100%;
+        border: solid color-mix(in srgb, currentColor 12%, transparent) 1px;
+        border-radius: 14px;
+        overflow: hidden;
+        flex-direction: column;
+        background-color: var(--background);
+        box-shadow: 0 24px 60px rgba(0,0,0,.28);
+      }
+      .search-field {
+        display: flex;
+        height: 3.5rem;
+        padding-left: 1rem;
+        padding-right: 1rem;
+        border-bottom-style: solid;
+        border-bottom-color: color-mix(in srgb, currentColor 12%, transparent);
+        border-bottom-width: 1px;
+        align-items: center;
+        column-gap: 0.75rem;
+      }
+      .search-field svg {
+        opacity: 0.5;
+        flex-shrink: 0;
+      }
+      .search-field input {
+        min-width: 0;
+        border: none;
+        outline-style: none;
+        flex-grow: 1;
+        color: inherit;
+        font-family: inherit;
+        font-size: 1rem;
+        background-color: transparent;
+      }
+      .search-dismiss {
+        padding: 0.25rem 0.5rem;
+        border: solid color-mix(in srgb, currentColor 18%, transparent) 1px;
+        border-radius: 6px;
+        opacity: 0.6;
+        cursor: pointer;
+        flex-shrink: 0;
+        color: inherit;
+        font-size: 0.6875rem;
+        background-color: transparent;
+      }
+      .search-dismiss:hover {
+        opacity: 1.0;
+      }
+      .search-results {
+        padding: 0.5rem;
+        overflow-y: auto;
+      }
+      .search-empty {
+        padding: 1.5rem;
+        opacity: 0.7;
+        text-align: center;
+        font-size: 0.875rem;
+      }
+      .search-empty .search-hint {
+        display: block;
+        margin-top: 0.5rem;
+        opacity: 0.8;
+        font-size: 0.8125rem;
+      }
+      .search-hit-list {
+        padding: 0;
+        margin: 0;
+        list-style-type: none;
+      }
+      .search-hit {
+        display: block;
+        padding: 0.625rem 0.875rem;
+        border-radius: 10px;
+        color: inherit;
+        text-decoration: none;
+      }
+      .search-hit[data-selected] {
+        background-color: color-mix(in srgb, currentColor 8%, transparent);
+      }
+      .search-hit .search-hit-crumb {
+        display: flex;
+        opacity: 0.6;
+        column-gap: 0.375rem;
+        font-size: 0.6875rem;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+      }
+      .search-hit .search-hit-crumb .search-hit-sep {
+        opacity: 0.5;
+      }
+      .search-hit .search-hit-heading {
+        margin-top: 0.125rem;
+        font-size: 0.9375rem;
+        font-weight: 600;
+      }
+      .search-hit .search-hit-snippet {
+        margin-top: 0.1875rem;
+        opacity: 0.72;
+        font-size: 0.8125rem;
+        line-height: 1.4em;
+      }
+      .search-hit mark {
+        padding-left: 1px;
+        padding-right: 1px;
+        border-radius: 3px;
+        color: var(--primary);
+        font-weight: 600;
+        background-color: color-mix(in srgb, currentColor 18%, transparent);
+      }
+      .search-footer {
+        display: flex;
+        padding: 0.625rem 1rem;
+        border-top-style: solid;
+        border-top-color: color-mix(in srgb, currentColor 12%, transparent);
+        border-top-width: 1px;
+        opacity: 0.55;
+        column-gap: 1rem;
+        font-size: 0.6875rem;
+      }
+      .search-footer kbd {
+        padding-left: 0.25rem;
+        padding-right: 0.25rem;
+        margin-right: 0.25rem;
+        border: solid color-mix(in srgb, currentColor 20%, transparent) 1px;
+        border-radius: 4px;
+        font-family: monospace;
+      }
+    </style>
+    <script id="theme-script">
+                  let userTheme = window.localStorage.getItem('jaspr:theme');
+                  if (userTheme != null) {
+                    document.documentElement.setAttribute('data-theme', userTheme);
+                  } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                    document.documentElement.setAttribute('data-theme', 'dark');
+                  } else {
+                    document.documentElement.setAttribute('data-theme', 'light');
+                  }
+                
+    </script>
+    <style>
+      .docs-sidebar {
+        position: relative;
+        padding: 0.75rem 0.75rem 2rem 0.5rem;
+        font-size: 0.875rem;
+        line-height: 1.25rem;
+      }
+      @media all and (min-width: 1024px) {
+        .docs-sidebar {
+          padding-top: 1rem;
+        }
+      }
+      .docs-sidebar .sidebar-close {
+        position: absolute;
+        top: 0.75rem;
+        right: 0.75rem;
+        border: unset;
+        cursor: pointer;
+        color: inherit;
+        background-color: transparent;
+      }
+      @media all and (min-width: 1024px) {
+        .docs-sidebar .sidebar-close {
+          display: none;
+        }
+      }
+      .docs-sidebar ul {
+        padding: 0;
+        margin: 0;
+        list-style-type: none;
+      }
+      .docs-sidebar .docs-sidebar-top {
+        margin-bottom: 0.5rem;
+      }
+      .docs-sidebar .docs-sidebar-link {
+        display: flex;
+        padding: 0.375rem 0.75rem;
+        margin-bottom: 1px;
+        border-radius: 0.375rem;
+        opacity: 0.75;
+        transition: all 150ms ease-in-out;
+        align-items: center;
+        column-gap: 0.5rem;
+        color: inherit;
+        text-decoration: none;
+      }
+      .docs-sidebar .docs-sidebar-link:hover {
+        opacity: 1.0;
+        background-color: color-mix(in srgb, currentColor 6%, transparent);
+      }
+      .docs-sidebar .docs-sidebar-link.active {
+        opacity: 1.0;
+        color: var(--primary);
+        font-weight: 600;
+        background-color: color-mix(in srgb, currentColor 14%, transparent);
+      }
+      .docs-sidebar .docs-sidebar-link span:first-child {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      .docs-sidebar .docs-sidebar-badge {
+        padding-left: 0.3125rem;
+        padding-right: 0.3125rem;
+        border-radius: 999px;
+        flex-shrink: 0;
+        color: var(--primary);
+        font-size: 0.625rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
+        background-color: color-mix(in srgb, currentColor 15%, transparent);
+      }
+      .docs-sidebar .docs-sidebar-group > ul {
+        padding-left: 0.5rem;
+        margin-left: 1.0625rem;
+        margin-bottom: 0.5rem;
+        border-left-style: solid;
+        border-left-color: color-mix(in srgb, currentColor 12%, transparent);
+        border-left-width: 1px;
+      }
+      .docs-sidebar .docs-sidebar-group[open] .docs-sidebar-chevron svg {
+        transform: rotate(90deg);
+      }
+      .docs-sidebar .docs-sidebar-summary {
+        display: flex;
+        padding: 0.4375rem 0.5rem;
+        border-radius: 0.375rem;
+        cursor: pointer;
+        user-select: none;
+        -webkit-user-select: none;
+        align-items: center;
+        column-gap: 0.5rem;
+        list-style-type: none;
+        font-weight: 600;
+      }
+      .docs-sidebar .docs-sidebar-summary::-webkit-details-marker {
+        display: none;
+      }
+      .docs-sidebar .docs-sidebar-summary:hover {
+        background-color: color-mix(in srgb, currentColor 6%, transparent);
+      }
+      .docs-sidebar .docs-sidebar-summary .docs-sidebar-icon {
+        display: flex;
+        opacity: 0.6;
+        flex-shrink: 0;
+      }
+      .docs-sidebar .docs-sidebar-summary .docs-sidebar-title {
+        flex-grow: 1;
+      }
+      .docs-sidebar .docs-sidebar-summary .docs-sidebar-chevron {
+        display: flex;
+        opacity: 0.45;
+      }
+      .docs-sidebar .docs-sidebar-summary .docs-sidebar-chevron svg {
+        transition: transform 150ms ease-in-out;
+      }
+    </style>
+    <style>
+      :root {
+        --primary: oklch(0.585 0.233 277.117);
+        --background: oklch(0.984 0.003 247.858);
+        --text: oklch(0.373 0.034 259.733);
+        --content-headings: oklch(0.21 0.034 264.665);
+        --content-lead: oklch(0.446 0.03 256.802);
+        --content-links: oklch(0.21 0.034 264.665);
+        --content-bold: oklch(0.21 0.034 264.665);
+        --content-counters: oklch(0.551 0.027 264.364);
+        --content-bullets: oklch(0.872 0.01 258.338);
+        --content-hr: oklch(0.928 0.006 264.531);
+        --content-quotes: oklch(0.21 0.034 264.665);
+        --content-quote-borders: oklch(0.928 0.006 264.531);
+        --content-captions: oklch(0.551 0.027 264.364);
+        --content-kbd: oklch(0.21 0.034 264.665);
+        --content-kbd-shadows: oklch(0.21 0.034 264.665);
+        --content-code: oklch(0.21 0.034 264.665);
+        --content-pre-code: oklch(0.928 0.006 264.531);
+        --content-pre-bg: oklch(0.278 0.033 256.848);
+        --content-th-borders: oklch(0.872 0.01 258.338);
+        --content-td-borders: oklch(0.928 0.006 264.531);
+      }
+      :root[data-theme="dark"] {
+        --primary: oklch(0.785 0.115 274.713);
+        --background: oklch(0.141 0.005 285.823);
+        --text: oklch(0.928 0.006 264.531);
+        --content-headings: white;
+        --content-lead: oklch(0.707 0.022 261.325);
+        --content-links: white;
+        --content-bold: white;
+        --content-counters: oklch(0.707 0.022 261.325);
+        --content-bullets: oklch(0.446 0.03 256.802);
+        --content-hr: oklch(0.373 0.034 259.733);
+        --content-quotes: oklch(0.967 0.003 264.542);
+        --content-quote-borders: oklch(0.373 0.034 259.733);
+        --content-captions: oklch(0.707 0.022 261.325);
+        --content-kbd: white;
+        --content-kbd-shadows: white;
+        --content-code: white;
+        --content-pre-code: oklch(0.872 0.01 258.338);
+        --content-pre-bg: rgb(0 0 0 / 50%);
+        --content-th-borders: oklch(0.446 0.03 256.802);
+        --content-td-borders: oklch(0.373 0.034 259.733);
+      }
+      *, :after, :before {
+        box-sizing: border-box;
+        border: solid #e5e7eb 0;
+      }
+      :host,html {
+        line-height: 1.5em;
+        -webkit-text-size-adjust: 100%;
+        -moz-tab-size: 4;
+        tab-size: 4;
+        font-feature-settings: normal;
+        font-variation-settings: normal;
+        -webkit-tap-highlight-color: transparent;
+      }
+      body {
+        margin: 0;
+        line-height: inherit;
+        -webkit-font-smoothing: antialiased;
+      }
+      hr {
+        height: 0;
+        border-top-style: solid;
+        border-top-width: 1px;
+        color: inherit;
+      }
+      a {
+        color: inherit;
+        text-decoration: inherit;
+      }
+      b, strong {
+        font-weight: bolder;
+      }
+      code, kbd, pre, samp {
+        font-size: 1em;
+        font-feature-settings: normal;
+        font-variation-settings: normal;
+      }
+      small {
+        font-size: 80%;
+      }
+      sub, sup {
+        position: relative;
+        font-size: 75%;
+        line-height: 0;
+        vertical-align: baseline;
+      }
+      sub {
+        position: relative;
+        bottom: -0.25em;
+      }
+      sup {
+        position: relative;
+        top: -0.5em;
+      }
+      table {
+        border: solid inherit;
+        text-indent: 0;
+        border-collapse: collapse;
+      }
+      button, input, optgroup, select, textarea {
+        padding: 0;
+        margin: 0;
+        color: inherit;
+        font-family: inherit;
+        font-size: 100%;
+        font-weight: inherit;
+        letter-spacing: inherit;
+        line-height: inherit;
+        font-feature-settings: inherit;
+        font-variation-settings: inherit;
+      }
+      button, select {
+        text-transform: none;
+      }
+      button, input[type=button], input[type=reset], input[type=submit] {
+        -webkit-appearance: button;
+        background-color: transparent;
+        background-image: none;
+      }
+      :-moz-focusring {
+        outline: auto;
+      }
+      :-moz-ui-invalid {
+        box-shadow: none;
+      }
+      progress {
+        vertical-align: baseline;
+      }
+      ::-webkit-inner-spin-button, ::-webkit-outer-spin-button {
+        height: auto;
+      }
+      [type=search] {
+        -webkit-appearance: textfield;
+        outline-offset: -2px;
+      }
+      ::-webkit-search-decoration {
+        -webkit-appearance: none;
+      }
+      ::-webkit-file-upload-button {
+        -webkit-appearance: button;
+        font: inherit;
+      }
+      summary {
+        display: list-item;
+      }
+      blockquote, dd, dl, figure, h1, h2, h3, h4, h5, h6, hr, p, pre {
+        margin: 0;
+      }
+      fieldset {
+        margin: 0;
+      }
+      fieldset, legend {
+        padding: 0;
+      }
+      menu, ol, ul {
+        padding: 0;
+        margin: 0;
+        list-style-type: none;
+      }
+      dialog {
+        padding: 0;
+      }
+      textarea {
+        resize: vertical;
+      }
+      input::placeholder, textarea::placeholder {
+        opacity: 1.0;
+        color: #9ca3af;
+      }
+      [role=button], button {
+        cursor: pointer;
+      }
+      :disabled {
+        cursor: default;
+      }
+      audio, canvas, embed, iframe, img, object, svg, video {
+        display: block;
+        vertical-align: middle;
+      }
+      img, video {
+        height: auto;
+        max-width: 100%;
+      }
+      :root {
+        --content-font: 'Open Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+        --content-code-font: 'JetBrains Mono', ui-monospace, 'SFMono-Regular', 'Menlo', 'Monaco', 'Consolas', 'Liberation Mono', 'Courier New', monospace;
+      }
+      :host,html {
+        font-family: var(--content-font);
+      }
+      code, kbd, pre, samp {
+        font-family: var(--content-code-font);
+      }
+      body {
+        color: var(--text);
+        background-color: var(--background);
+      }
+      .content {
+        color: var(--text);
+        font-size: 1rem;
+        line-height: 1.75em;
+      }
+      .content :where(a):not(:where([class~=not-content],[class~=not-content] *)) {
+        color: var(--content-links);
+        font-weight: 500;
+        text-decoration: underline;
+      }
+      .content :where(strong):not(:where([class~=not-content],[class~=not-content] *)) {
+        color: var(--content-bold);
+        font-weight: 600;
+      }
+      .content :where(a strong):not(:where([class~=not-content],[class~=not-content] *)) {
+        color: inherit;
+      }
+      .content :where(blockquote strong):not(:where([class~=not-content],[class~=not-content] *)) {
+        color: inherit;
+      }
+      .content :where(thead th strong):not(:where([class~=not-content],[class~=not-content] *)) {
+        color: inherit;
+      }
+      .content :where(ol):not(:where([class~=not-content],[class~=not-content] *)) {
+        list-style-type: decimal;
+      }
+      .content :where(ol[type="A"]):not(:where([class~=not-content],[class~=not-content] *)) {
+        list-style-type: upper-alpha;
+      }
+      .content :where(ol[type="a"]):not(:where([class~=not-content],[class~=not-content] *)) {
+        list-style-type: lower-alpha;
+      }
+      .content :where(ol[type="A" s]):not(:where([class~=not-content],[class~=not-content] *)) {
+        list-style-type: upper-alpha;
+      }
+      .content :where(ol[type="a" s]):not(:where([class~=not-content],[class~=not-content] *)) {
+        list-style-type: lower-alpha;
+      }
+      .content :where(ol[type="I"]):not(:where([class~=not-content],[class~=not-content] *)) {
+        list-style-type: upper-roman;
+      }
+      .content :where(ol[type="i"]):not(:where([class~=not-content],[class~=not-content] *)) {
+        list-style-type: lower-roman;
+      }
+      .content :where(ol[type="I" s]):not(:where([class~=not-content],[class~=not-content] *)) {
+        list-style-type: upper-roman;
+      }
+      .content :where(ol[type="i" s]):not(:where([class~=not-content],[class~=not-content] *)) {
+        list-style-type: lower-roman;
+      }
+      .content :where(ol[type="1"]):not(:where([class~=not-content],[class~=not-content] *)) {
+        list-style-type: decimal;
+      }
+      .content :where(ul):not(:where([class~=not-content],[class~=not-content] *)) {
+        list-style-type: disc;
+      }
+      .content :where(ol > li::marker):not(:where([class~=not-content],[class~=not-content] *)) {
+        color: var(--content-counters);
+        font-weight: 400;
+      }
+      .content :where(ul > li::marker):not(:where([class~=not-content],[class~=not-content] *)) {
+        color: var(--content-bullets);
+      }
+      .content :where(dt):not(:where([class~=not-content],[class~=not-content] *)) {
+        color: var(--content-headings);
+        font-weight: 600;
+      }
+      .content :where(hr):not(:where([class~=not-content],[class~=not-content] *)) {
+        border: solid var(--content-hr);
+        border-top-width: 1px;
+      }
+      .content :where(blockquote):not(:where([class~=not-content],[class~=not-content] *)) {
+        color: var(--content-quotes);
+        font-weight: 500;
+        font-style: italic;
+        border-inline-start-width: 0.25rem;
+        border-inline-start-color: var(--content-quote-borders);
+        quotes: "\201C""\201D""\2018""\2019";
+      }
+      .content :where(blockquote p:first-of-type::before):not(:where([class~=not-content],[class~=not-content] *)) {
+        content: open-quote;
+      }
+      .content :where(blockquote p:last-of-type::after):not(:where([class~=not-content],[class~=not-content] *)) {
+        content: close-quote;
+      }
+      .content :where(h1):not(:where([class~=not-content],[class~=not-content] *)) {
+        color: var(--content-headings);
+        font-weight: 800;
+      }
+      .content :where(h1 strong):not(:where([class~=not-content],[class~=not-content] *)) {
+        color: inherit;
+        font-weight: 900;
+      }
+      .content :where(h2):not(:where([class~=not-content],[class~=not-content] *)) {
+        color: var(--content-headings);
+        font-weight: 700;
+      }
+      .content :where(h2 strong):not(:where([class~=not-content],[class~=not-content] *)) {
+        color: inherit;
+        font-weight: 800;
+      }
+      .content :where(h3):not(:where([class~=not-content],[class~=not-content] *)) {
+        color: var(--content-headings);
+        font-weight: 600;
+      }
+      .content :where(h3 strong):not(:where([class~=not-content],[class~=not-content] *)) {
+        color: inherit;
+        font-weight: 700;
+      }
+      .content :where(h4):not(:where([class~=not-content],[class~=not-content] *)) {
+        color: var(--content-headings);
+        font-weight: 600;
+      }
+      .content :where(h4 strong):not(:where([class~=not-content],[class~=not-content] *)) {
+        color: inherit;
+        font-weight: 700;
+      }
+      .content :where(picture):not(:where([class~=not-content],[class~=not-content] *)) {
+        display: block;
+      }
+      .content :where(kbd):not(:where([class~=not-content],[class~=not-content] *)) {
+        color: var(--content-kbd);
+        font-family: inherit;
+        font-weight: 500;
+      }
+      .content :where(code):not(:where([class~=not-content],[class~=not-content] *)) {
+        color: var(--content-code);
+        font-weight: 600;
+      }
+      .content :where(code::before):not(:where([class~=not-content],[class~=not-content] *)) {
+        content: "`";
+      }
+      .content :where(code::after):not(:where([class~=not-content],[class~=not-content] *)) {
+        content: "`";
+      }
+      .content :where(a code):not(:where([class~=not-content],[class~=not-content] *)) {
+        color: inherit;
+      }
+      .content :where(h1 code):not(:where([class~=not-content],[class~=not-content] *)) {
+        color: inherit;
+      }
+      .content :where(h2 code):not(:where([class~=not-content],[class~=not-content] *)) {
+        color: inherit;
+      }
+      .content :where(h3 code):not(:where([class~=not-content],[class~=not-content] *)) {
+        color: inherit;
+      }
+      .content :where(h4 code):not(:where([class~=not-content],[class~=not-content] *)) {
+        color: inherit;
+      }
+      .content :where(blockquote code):not(:where([class~=not-content],[class~=not-content] *)) {
+        color: inherit;
+      }
+      .content :where(thead th code):not(:where([class~=not-content],[class~=not-content] *)) {
+        color: inherit;
+      }
+      .content :where(pre):not(:where([class~=not-content],[class~=not-content] *)) {
+        overflow-x: auto;
+        color: var(--content-pre-code);
+        font-weight: 400;
+        background-color: var(--content-pre-bg);
+      }
+      .content :where(pre code):not(:where([class~=not-content],[class~=not-content] *)) {
+        padding: 0;
+        border: solid 0;
+        border-radius: 0;
+        color: inherit;
+        font-size: inherit;
+        font-weight: inherit;
+        line-height: inherit;
+        background-color: transparent;
+      }
+      .content :where(pre code::before):not(:where([class~=not-content],[class~=not-content] *)) {
+        content: none;
+      }
+      .content :where(pre code::after):not(:where([class~=not-content],[class~=not-content] *)) {
+        content: none;
+      }
+      .content :where(table):not(:where([class~=not-content],[class~=not-content] *)) {
+        width: 100%;
+        margin-top: 2em;
+        margin-bottom: 2em;
+        table-layout: auto;
+      }
+      .content :where(thead):not(:where([class~=not-content],[class~=not-content] *)) {
+        border-bottom-style: solid;
+        border-bottom-color: var(--content-th-borders);
+        border-bottom-width: 1px;
+      }
+      .content :where(thead th):not(:where([class~=not-content],[class~=not-content] *)) {
+        color: var(--content-headings);
+        font-weight: 600;
+        vertical-align: bottom;
+      }
+      .content :where(tbody tr):not(:where([class~=not-content],[class~=not-content] *)) {
+        border-bottom-style: solid;
+        border-bottom-color: var(--content-td-borders);
+        border-bottom-width: 1px;
+      }
+      .content :where(tbody tr:last-child):not(:where([class~=not-content],[class~=not-content] *)) {
+        border-bottom-style: solid;
+        border-bottom-width: 0;
+      }
+      .content :where(tbody td):not(:where([class~=not-content],[class~=not-content] *)) {
+        vertical-align: baseline;
+      }
+      .content :where(tfoot):not(:where([class~=not-content],[class~=not-content] *)) {
+        border-top-style: solid;
+        border-top-color: var(--content-th-borders);
+        border-top-width: 1px;
+      }
+      .content :where(tfoot td):not(:where([class~=not-content],[class~=not-content] *)) {
+        vertical-align: top;
+      }
+      .content :where(th, td):not(:where([class~=not-content],[class~=not-content] *)) {
+        text-align: start;
+      }
+      .content :where(figcaption):not(:where([class~=not-content],[class~=not-content] *)) {
+        color: var(--content-captions);
+      }
+      .content :where(p):not(:where([class~=not-content],[class~=not-content] *)) {
+        margin-top: 1.25em;
+        margin-bottom: 1.25em;
+      }
+      .content :where(blockquote):not(:where([class~=not-content],[class~=not-content] *)) {
+        padding-left: 1em;
+        margin-top: 1.6em;
+        margin-bottom: 1.6em;
+      }
+      .content :where(h1):not(:where([class~=not-content],[class~=not-content] *)) {
+        margin-top: 0;
+        margin-bottom: 0.88em;
+        font-size: 2.25em;
+        line-height: 1.11em;
+      }
+      .content :where(h2):not(:where([class~=not-content],[class~=not-content] *)) {
+        margin-top: 1.5em;
+        margin-bottom: 1em;
+        font-size: 1.5em;
+        line-height: 1.33em;
+      }
+      .content :where(h3):not(:where([class~=not-content],[class~=not-content] *)) {
+        margin-top: 1.6em;
+        margin-bottom: 0.6em;
+        font-size: 1.25em;
+        line-height: 1.6em;
+      }
+      .content :where(h4):not(:where([class~=not-content],[class~=not-content] *)) {
+        margin-top: 2em;
+        margin-bottom: 0.5em;
+        line-height: 1.5em;
+      }
+      .content :where(img):not(:where([class~=not-content],[class~=not-content] *)) {
+        margin-top: 2em;
+        margin-bottom: 2em;
+      }
+      .content :where(picture):not(:where([class~=not-content],[class~=not-content] *)) {
+        margin-top: 2em;
+        margin-bottom: 2em;
+      }
+      .content :where(picture > img):not(:where([class~=not-content],[class~=not-content] *)) {
+        margin-top: 0;
+        margin-bottom: 0;
+      }
+      .content :where(video):not(:where([class~=not-content],[class~=not-content] *)) {
+        margin-top: 2em;
+        margin-bottom: 2em;
+      }
+      .content :where(kbd):not(:where([class~=not-content],[class~=not-content] *)) {
+        padding: 0.1875rem 0.375rem 0.1875rem 0.375rem;
+        border-radius: 0.3125rem;
+        font-size: 0.875em;
+      }
+      .content :where(code):not(:where([class~=not-content],[class~=not-content] *)) {
+        font-size: 0.875em;
+      }
+      .content :where(h2 code):not(:where([class~=not-content],[class~=not-content] *)) {
+        font-size: 0.875em;
+      }
+      .content :where(h3 code):not(:where([class~=not-content],[class~=not-content] *)) {
+        font-size: 0.9em;
+      }
+      .content :where(pre):not(:where([class~=not-content],[class~=not-content] *)) {
+        padding: 0.857em 1.14em 0.857em 1.14em;
+        margin-top: 1.71em;
+        margin-bottom: 1.71em;
+        border-radius: 0.375rem;
+        font-size: 0.875em;
+        line-height: 1.71em;
+      }
+      .content :where(ol):not(:where([class~=not-content],[class~=not-content] *)) {
+        padding-left: 1.625em;
+        margin-top: 1.25em;
+        margin-bottom: 1.25em;
+      }
+      .content :where(ul):not(:where([class~=not-content],[class~=not-content] *)) {
+        padding-left: 1.625em;
+        margin-top: 1.25em;
+        margin-bottom: 1.25em;
+      }
+      .content :where(li):not(:where([class~=not-content],[class~=not-content] *)) {
+        margin-top: 0.5em;
+        margin-bottom: 0.5em;
+      }
+      .content :where(ol > li):not(:where([class~=not-content],[class~=not-content] *)) {
+        padding-left: 0.375em;
+      }
+      .content :where(ul > li):not(:where([class~=not-content],[class~=not-content] *)) {
+        padding-left: 0.375em;
+      }
+      .content :where(> ul > li p):not(:where([class~=not-content],[class~=not-content] *)) {
+        margin-top: 0.75em;
+        margin-bottom: 0.75em;
+      }
+      .content :where(> ul > li > p:first-child):not(:where([class~=not-content],[class~=not-content] *)) {
+        margin-top: 1.25em;
+      }
+      .content :where(> ul > li > p:last-child):not(:where([class~=not-content],[class~=not-content] *)) {
+        margin-bottom: 1.25em;
+      }
+      .content :where(> ol > li > p:first-child):not(:where([class~=not-content],[class~=not-content] *)) {
+        margin-top: 1.25em;
+      }
+      .content :where(> ol > li > p:last-child):not(:where([class~=not-content],[class~=not-content] *)) {
+        margin-bottom: 1.25em;
+      }
+      .content :where(ul ul, ul ol, ol ul, ol ol):not(:where([class~=not-content],[class~=not-content] *)) {
+        margin-top: 0.75em;
+        margin-bottom: 0.75em;
+      }
+      .content :where(dl):not(:where([class~=not-content],[class~=not-content] *)) {
+        margin-top: 1.25em;
+        margin-bottom: 1.25em;
+      }
+      .content :where(dt):not(:where([class~=not-content],[class~=not-content] *)) {
+        margin-top: 1.25em;
+      }
+      .content :where(dd):not(:where([class~=not-content],[class~=not-content] *)) {
+        padding-left: 1.625em;
+        margin-top: 0.5em;
+      }
+      .content :where(hr):not(:where([class~=not-content],[class~=not-content] *)) {
+        margin-top: 3em;
+        margin-bottom: 3em;
+      }
+      .content :where(hr + *):not(:where([class~=not-content],[class~=not-content] *)) {
+        margin-top: 0;
+      }
+      .content :where(h2 + *):not(:where([class~=not-content],[class~=not-content] *)) {
+        margin-top: 0;
+      }
+      .content :where(h3 + *):not(:where([class~=not-content],[class~=not-content] *)) {
+        margin-top: 0;
+      }
+      .content :where(h4 + *):not(:where([class~=not-content],[class~=not-content] *)) {
+        margin-top: 0;
+      }
+      .content :where(table):not(:where([class~=not-content],[class~=not-content] *)) {
+        font-size: 0.875em;
+        line-height: 1.71em;
+      }
+      .content :where(thead th):not(:where([class~=not-content],[class~=not-content] *)) {
+        padding-left: 0.57em;
+        padding-right: 0.57em;
+        padding-bottom: 0.57em;
+      }
+      .content :where(thead th:first-child):not(:where([class~=not-content],[class~=not-content] *)) {
+        padding-left: 0;
+      }
+      .content :where(thead th:last-child):not(:where([class~=not-content],[class~=not-content] *)) {
+        padding-right: 0;
+      }
+      .content :where(tbody td, tfoot td):not(:where([class~=not-content],[class~=not-content] *)) {
+        padding: 0.57em 0.57em 0.57em 0.57em;
+      }
+      .content :where(tbody td:first-child, tfoot td:first-child):not(:where([class~=not-content],[class~=not-content] *)) {
+        padding-left: 0;
+      }
+      .content :where(tbody td:last-child, tfoot td:last-child):not(:where([class~=not-content],[class~=not-content] *)) {
+        padding-right: 0;
+      }
+      .content :where(figure):not(:where([class~=not-content],[class~=not-content] *)) {
+        margin-top: 2em;
+        margin-bottom: 2em;
+      }
+      .content :where(figure > *):not(:where([class~=not-content],[class~=not-content] *)) {
+        margin-top: 0;
+        margin-bottom: 0;
+      }
+      .content :where(figcaption):not(:where([class~=not-content],[class~=not-content] *)) {
+        margin-top: 0.857em;
+        font-size: 0.875em;
+        line-height: 1.42em;
+      }
+      .content :where(> :first-child):not(:where([class~=not-content],[class~=not-content] *)) {
+        margin-top: 0;
+      }
+      .content :where(> :last-child):not(:where([class~=not-content],[class~=not-content] *)) {
+        margin-bottom: 0;
+      }
+    </style>
+    <style>
+      :is(h1, h2, h3, h4, h5, h6)[anchor="true"] {
+        display: flex;
+        align-items: baseline;
+        column-gap: 0.5rem;
+      }
+      :is(h1, h2, h3, h4, h5, h6)[anchor="true"] > a {
+        opacity: 0.0;
+        transition: opacity 300ms;
+        font-size: 0.8em;
+        text-decoration: none;
+      }
+      :is(h1, h2, h3, h4, h5, h6)[anchor="true"]:hover > a {
+        opacity: 0.8;
+      }
+      :is(h1, h2, h3, h4, h5, h6)[anchor="true"] > a:hover {
+        opacity: 1.0;
+      }
+    </style>
+    <!--/-->
+    <script src="main.client.dart.js" defer></script>
+    <style>
+      .callout {
+        display: flex;
+        padding: 1rem 1.25rem;
+        margin-bottom: 0.75rem;
+        border: solid 1px;
+        border-radius: 0.75rem;
+        column-gap: 1rem;
+      }
+      .callout span:first-child {
+        padding-top: 0.25rem;
+        flex-shrink: 0;
+      }
+      .callout span:last-child > p {
+        margin: 0;
+      }
+      .callout.callout-info {
+        border: solid rgba(14,165,233,.2);
+        color: rgb(3 105 161);
+        background-color: rgba(186, 230, 253, .1);
+      }
+      .callout.callout-warning {
+        border: solid rgba(234,179,8,.2);
+        color: rgb(161 98 7);
+        background-color: hsla(53,98%,77%,.1);
+      }
+      .callout.callout-error {
+        border: solid rgba(239,68,68,.2);
+        color: rgb(185 28 28);
+        background-color: hsla(0,96%,89%,.1);
+      }
+      .callout.callout-success {
+        border: solid rgba(34,197,94,.2);
+        color: oklch(0.527 0.154 150.069);
+        background-color: rgba(187,247,208,.1);
+      }
+      [data-theme="dark"] .callout.callout-info {
+        border: solid rgba(14,165,233,.5);
+        color: inherit;
+        background-color: rgba(14,165,233,.1);
+      }
+      [data-theme="dark"] .callout.callout-warning {
+        border: solid rgba(234,179,8,.5);
+        color: inherit;
+        background-color: rgba(234,179,8,.1);
+      }
+      [data-theme="dark"] .callout.callout-error {
+        border: solid rgba(239,68,68,.5);
+        color: inherit;
+        background-color: rgba(239,68,68,.1);
+      }
+      [data-theme="dark"] .callout.callout-success {
+        border: solid rgba(34,197,94,.5);
+        color: inherit;
+        background-color: rgba(34,197,94,.1);
+      }
+      .code-block {
+        position: relative;
+      }
+      .code-block button {
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        z-index: 10;
+        width: 1.25rem;
+        height: 1.25rem;
+        opacity: 0.0;
+        color: white;
+      }
+      .code-block:hover button {
+        opacity: 0.75;
+      }
+      figure.image {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+      .theme-toggle {
+        display: flex;
+        padding: 0.7rem;
+        border: unset;
+        border-radius: 8px;
+        outline: unset;
+        align-items: center;
+        background-color: transparent;
+      }
+      .theme-toggle:hover {
+        background-color: color-mix(in srgb, currentColor 5%, transparent);
+      }
+      figure.image.zoomable img {
+        cursor: zoom-in;
+      }
+      dialog.zoom-modal {
+        width: 100vw;
+        height: 100vh;
+        max-width: initial;
+        max-height: initial;
+        padding: 0;
+        margin: 0;
+        border: none;
+        outline-style: none;
+        overflow: hidden;
+        background-color: transparent;
+      }
+      dialog.zoom-modal .image-wrapper {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        background-color: var(--background);
+      }
+      dialog.zoom-modal img {
+        position: absolute;
+        cursor: zoom-out;
+        transition: transform 300ms;
+        transform-origin: top left;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="docs">
+      <div class="header-container" data-has-sidebar>
+        <header class="header">
+          <!--@jaspr_content:sidebar_toggle_button-->
+          <button class="sidebar-toggle-button">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" x2="20" y1="12" y2="12"></line><line x1="4" x2="20" y1="6" y2="6"></line><line x1="4" x2="20" y1="18" y2="18"></line></svg>
+            
+          </button>
+          <!--/@jaspr_content:sidebar_toggle_button-->
+          <a class="header-title" href="/"><img alt="Logo" src="/images/logo.svg"/><span>picto</span></a>
+          <div class="header-content">
+            <div class="header-items">
+              <!--@search-->
+              <button class="search-trigger" aria-label="Search the documentation" type="button">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                <span class="search-trigger-label">Search</span>
+                <span class="search-trigger-keys">⌘K</span>
+              </button>
+              <!--/@search-->
+              <!--@jaspr_content:theme_toggle-->
+              <button class="theme-toggle" style="visibility: hidden" aria-label="Theme Toggle">
+                <span><svg fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" width="20px" height="20px"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path></svg></span>
+                <span style="display: none"><svg fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" width="20px" height="20px"><circle cx="12" cy="12" r="4"></circle><path d="M12 4h.01"></path><path d="M20 12h.01"></path><path d="M12 20h.01"></path><path d="M4 12h.01"></path><path d="M17.657 6.343h.01"></path><path d="M17.657 17.657h.01"></path><path d="M6.343 17.657h.01"></path><path d="M6.343 6.343h.01"></path></svg></span>
+              </button>
+              <!--/@jaspr_content:theme_toggle-->
+            </div>
+          </div>
+        </header>
+      </div>
+      <div class="main-container">
+        <div class="sidebar-barrier" role="button"></div>
+        <div class="sidebar-container">
+          <nav class="docs-sidebar" aria-label="Documentation">
+            <button class="sidebar-close" aria-label="Close navigation">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+            </button>
+            <ul class="docs-sidebar-top"><li><a class="docs-sidebar-link" href="/"><span>Introduction</span></a></li></ul>
+            <details class="docs-sidebar-group">
+              <summary class="docs-sidebar-summary">
+                <span class="docs-sidebar-icon"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/><path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"/><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/></svg></span>
+                <span class="docs-sidebar-title">Start Here</span>
+                <span class="docs-sidebar-chevron"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></span>
+              </summary>
+              <ul>
+                <li><a class="docs-sidebar-link" href="/getting-started/quick-start"><span>Quick Start</span></a></li>
+                <li>
+                  <a class="docs-sidebar-link" href="/getting-started/platform-support"><span>Platform Support</span></a>
+                </li>
+                <li>
+                  <a class="docs-sidebar-link" href="/getting-started/troubleshooting"><span>Troubleshooting</span></a>
+                </li>
+              </ul>
+            </details>
+            <details class="docs-sidebar-group" open>
+              <summary class="docs-sidebar-summary">
+                <span class="docs-sidebar-icon"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/></svg></span>
+                <span class="docs-sidebar-title">Recording</span>
+                <span class="docs-sidebar-chevron"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></span>
+              </summary>
+              <ul>
+                <li>
+                  <a class="docs-sidebar-link" href="/recording/recording-sessions"><span>Recording Sessions</span></a>
+                </li>
+                <li><a class="docs-sidebar-link" href="/recording/how-sessions-work"><span>How Sessions Work</span></a></li>
+                <li>
+                  <a class="docs-sidebar-link active" aria-current="page" href="/recording/errors"><span>Errors</span></a>
+                </li>
+                <li><a class="docs-sidebar-link" href="/recording/sampling"><span>Sampling</span></a></li>
+                <li>
+                  <a class="docs-sidebar-link" href="/recording/what-gets-recorded"><span>What Gets Recorded</span></a>
+                </li>
+                <li><a class="docs-sidebar-link" href="/recording/adding-context"><span>Adding Context</span></a></li>
+                <li><a class="docs-sidebar-link" href="/recording/testing"><span>Testing</span></a></li>
+                <li><a class="docs-sidebar-link" href="/assets/uploading-assets"><span>Uploading Assets</span></a></li>
+              </ul>
+            </details>
+            <details class="docs-sidebar-group">
+              <summary class="docs-sidebar-summary">
+                <span class="docs-sidebar-icon"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg></span>
+                <span class="docs-sidebar-title">Dashboard</span>
+                <span class="docs-sidebar-chevron"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></span>
+              </summary>
+              <ul>
+                <li>
+                  <a class="docs-sidebar-link" href="/dashboard/finding-and-watching-sessions"><span>Finding &amp; Watching Sessions</span></a>
+                </li>
+                <li><a class="docs-sidebar-link" href="/dashboard/alerts"><span>Alerts</span></a></li>
+                <li><a class="docs-sidebar-link" href="/dashboard/account-and-team"><span>Account &amp; Team</span></a></li>
+                <li>
+                  <a class="docs-sidebar-link" href="/dashboard/plans-and-retention"><span>Plans &amp; Retention</span></a>
+                </li>
+              </ul>
+            </details>
+            <details class="docs-sidebar-group">
+              <summary class="docs-sidebar-summary">
+                <span class="docs-sidebar-icon"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" x2="4" y1="21" y2="14"/><line x1="4" x2="4" y1="10" y2="3"/><line x1="12" x2="12" y1="21" y2="12"/><line x1="12" x2="12" y1="8" y2="3"/><line x1="20" x2="20" y1="21" y2="16"/><line x1="20" x2="20" y1="12" y2="3"/><line x1="2" x2="6" y1="14" y2="14"/><line x1="10" x2="14" y1="8" y2="8"/><line x1="18" x2="22" y1="16" y2="16"/></svg></span>
+                <span class="docs-sidebar-title">Agents &amp; Reference</span>
+                <span class="docs-sidebar-chevron"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></span>
+              </summary>
+              <ul>
+                <li><a class="docs-sidebar-link" href="/agents/sessions-cli"><span>Sessions for AI Agents</span></a></li>
+                <li><a class="docs-sidebar-link" href="/reference/sdk-api"><span>SDK API</span></a></li>
+              </ul>
+            </details>
+          </nav>
+        </div>
+        <main>
+          <div>
+            <div class="content-container">
+              <div class="content-header">
+                <nav class="breadcrumbs" aria-label="Breadcrumb"><a href="/">Docs</a><span class="breadcrumb-sep">/</span><span>Recording</span></nav>
+                <h1>Errors</h1>
+                <p>
+                  How an uncaught error starts a recording or bounds the one already running, what the capture window around the error keeps, and where Picto stands down.
+                </p>
+              </div>
+              <section class="content">
+                <p>
+                  An uncaught error is the one thing that starts a recording without your app asking. If a session is already recording, the error decides how much of it is uploaded and when it ends. You don't set anything up for this: 
+                  <code>Picto.setup</code> installs the error hooks.
+                </p>
+                <h2 id="which-errors-picto-sees" anchor="true"><span>Which errors Picto sees</span><a href="/recording/errors#which-errors-picto-sees">#</a></h2>
+                <p>
+                  <code>Picto.setup</code> adds a handler to <code>FlutterError.onError</code> (errors during build, layout and paint) and to 
+                  <code>PlatformDispatcher.instance.onError</code> (errors from async code). It chains onto any handler already installed, so your own handlers and crash reporter still run, and Picto doesn't mark any error as handled.
+                </p>
+                <p>
+                  On the web, Flutter reports uncaught async errors as the browser's <code>window</code> <code>error</code>
+                   event, so Picto listens for that too. It acts only on errors thrown by Dart, and only reads the event. In a WebAssembly build the browser exposes nothing of the Dart error, so the captured exception has the type 
+                  <code>WebAssembly.Exception</code>, a fixed message and no stack trace, and only the first such error in a run starts a session. To keep the details, run your app inside 
+                  <a href="https://api.dart.dev/dart-async/runZonedGuarded.html"><code>runZonedGuarded</code></a> and pass what it catches to 
+                  <code>PlatformDispatcher.instance.onError</code>.
+                </p>
+                <h2 id="when-nothing-is-recording" anchor="true"><span>When nothing is recording</span><a href="/recording/errors#when-nothing-is-recording">#</a></h2>
+                <p>
+                  From <code>Picto.setup</code> on, whenever the app is in the foreground and no session is live, Picto keeps a rolling in-memory buffer of about the last 
+                  <code>errorWindowBefore</code> (30 seconds by default) of the screen. This pre-roll has no <code>session_id</code>, is never written to disk and never uploads on its own. 
+                  <code>Picto.isRecording</code> is <code>false</code> while it runs, and <code>startRecording()</code>
+                   discards it.
+                </p>
+                <p>
+                  When an uncaught error fires with nothing recording, Picto turns the pre-roll into a session on the spot. The replay opens about 
+                  <code>errorWindowBefore</code> before the error. That session then follows the <a href="#the-capture-window">capture window</a>
+                   like any other.
+                </p>
+                <p>
+                  This happens even on a run that <a href="/recording/sampling">sampling</a> declined, because a run nobody was watching is the case it exists for. At a sampling rate of 
+                  <code>0</code>, error sessions are the only sessions you get. Error sessions also don't count toward 
+                  <code>maxNewSessionsPerHour</code> and are never refused by it.
+                </p>
+                <h3 id="one-session-per-error" anchor="true"><span>One session per error</span><a href="/recording/errors#one-session-per-error">#</a></h3>
+                <p>
+                  An uncaught error buys one session, not recording for the rest of the run. When the app returns from the background afterwards, Picto doesn't start another session; it runs only the pre-roll. To keep recording after an error, call 
+                  <code>Picto.startRecording()</code>.
+                </p>
+                <p>
+                  Picto remembers each error it has started a session for, by its type, message and the top six frames of its stack, until the app restarts. The same error firing again later doesn't start another session. A different error does. Picto remembers up to 256 errors and forgets the oldest past that.
+                </p>
+                <h2 id="when-a-session-is-recording" anchor="true">
+                  <span>When a session is recording</span><a href="/recording/errors#when-a-session-is-recording">#</a>
+                </h2>
+                <p>
+                  An error during a live session is recorded into that session; it never starts a second one. The first error of the session opens its capture window. Later errors are recorded too, but don't move or extend the window.
+                </p>
+                <h2 id="the-capture-window" anchor="true"><span>The capture window</span><a href="/recording/errors#the-capture-window">#</a></h2>
+                <p>
+                  A session with an uncaught error doesn't upload whole. It uploads a window around the session's first error.
+                </p>
+                <p>
+                  <strong>Before the error</strong>, the window keeps at least <code>errorWindowBefore</code>. It starts at a mark Picto takes every 5 seconds, so the real lookback is between 
+                  <code>errorWindowBefore</code> and <code>errorWindowBefore</code> plus 5 seconds. If the error came earlier than that in the session, the window starts at the beginning of the session.
+                </p>
+                <p><strong>After the error</strong>, the session ends and uploads at whichever comes first:</p>
+                <ul>
+                  <li><code>errorWindowAfter</code> (30 seconds by default) passes;</li>
+                  <li>the app goes to the background;</li>
+                  <li>you end the session.</li>
+                </ul>
+                <p>
+                  The timer is a ceiling, and going to the background usually gets there first. The session uploads once, whichever wins.
+                </p>
+                <p>
+                  The replay's timeline starts at the window, not at the session's start. Record five minutes, throw at the two-minute mark, and the replay runs about one minute, with the error about 30 seconds in. A short replay of a long session with 
+                  <code>hadError</code> is the window working, not a lost recording.
+                </p>
+                <p>While the window is open, the segment doesn't split at <code>maxRecordingDuration</code>.</p>
+                <h3 id="after-the-window-closes" anchor="true"><span>After the window closes</span><a href="/recording/errors#after-the-window-closes">#</a></h3>
+                <p>
+                  When the window closes, Picto uploads the session and goes back to the pre-roll, so the next error gets its full lookback too. No session starts because a window closed.
+                </p>
+                <p>
+                  If your app called <code>startRecording()</code>, recording resumes the next time the app returns to the foreground, as a new session at 
+                  <code>sequence</code> <code>0</code>. The errored session's id is retired, even when going to the background is what closed the window. Until then only the pre-roll runs. Call 
+                  <code>startRecording()</code> to resume sooner. A resumed session counts toward <code>maxNewSessionsPerHour</code>.
+                </p>
+                <h3 id="an-error-in-the-background" anchor="true"><span>An error in the background</span><a href="/recording/errors#an-error-in-the-background">#</a></h3>
+                <p>
+                  Nothing is drawn in the background, so the useful window is the one before the user left. When the app goes to the background, Picto keeps the last 
+                  <code>errorWindowBefore</code> in memory: the pre-roll if nothing was recording, or the end of your session if something was. Your session still ends and uploads as usual.
+                </p>
+                <p>
+                  An error thrown in the background, such as from a timer or a push handler, turns what was kept into its own session with a new 
+                  <code>session_id</code>. The replay opens about <code>errorWindowBefore</code> before the app left and ends with the error. It uploads straight away, since there is no after-window to wait for. Returning to the foreground discards what was kept.
+                </p>
+                <h3 id="when-there-is-no-lookback" anchor="true"><span>When there is no lookback</span><a href="/recording/errors#when-there-is-no-lookback">#</a></h3>
+                <p>
+                  An error that fires before Picto has finished setting up, or after the app left with nothing to keep, still starts a session, but the replay opens on the error. The first time this happens in a run, the console says so:
+                </p>
+                <div class="code-block">
+                  <!--@jaspr_content:code_block_copy_button-->
+                  <button>
+                    <svg fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" width="18px" height="18px">
+                      <rect rx="2" ry="2" x="8" y="8" width="14" height="14"></rect>
+                      <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"></path>
+                    </svg>
+                  </button>
+                  <!--/@jaspr_content:code_block_copy_button-->
+                  <pre><code><span style="color: #b9eeff"><span><span style="color: #5caeef">[</span>Picto<span style="color: #5caeef">]</span> started a recording for an uncaught error, and this one has NO before-window: nothing was capturing when the error fired, so the upload begins AT the exception instead of 30s in front of it. errorWindowBefore can only keep bytes that were already captured, and picto only keeps them after setup: either the error fired before picto finished setting up, or the app left before there was anything to keep. Said once per process.
+</span></span></code></pre>
+                </div>
+                <p>
+                  The number is your <code>errorWindowBefore</code>, so the message also confirms the value reached the SDK.
+                </p>
+                <h2 id="change-the-window" anchor="true"><span>Change the window</span><a href="/recording/errors#change-the-window">#</a></h2>
+                <p>Pass <code>errorWindowBefore</code> and <code>errorWindowAfter</code> to <code>Picto.setup</code>:</p>
+                <div class="code-block">
+                  <!--@jaspr_content:code_block_copy_button-->
+                  <button>
+                    <svg fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" width="18px" height="18px">
+                      <rect rx="2" ry="2" x="8" y="8" width="14" height="14"></rect>
+                      <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"></path>
+                    </svg>
+                  </button>
+                  <!--/@jaspr_content:code_block_copy_button-->
+                  <pre><code><span style="color: #b9eeff"><span style="color: #4ec9b0">Picto</span><span style="color: #d4d4d4">.</span><span style="color: #dcdcaa">setup</span><span><span style="color: #5caeef">(</span>
+  apiKey</span><span style="color: #d4d4d4">:</span> <span style="color: #569cd6">const</span> <span style="color: #4ec9b0">String</span><span style="color: #d4d4d4">.</span><span style="color: #dcdcaa">fromEnvironment</span><span style="color: #dfb976">(</span><span style="color: #ce9178">'PICTO_API_KEY'</span><span style="color: #dfb976">)</span><span style="color: #d4d4d4">,</span>
+  appVersion<span style="color: #d4d4d4">:</span> <span style="color: #ce9178">'1.0.0'</span><span style="color: #d4d4d4">,</span>
+  errorWindowBefore<span style="color: #d4d4d4">:</span> <span style="color: #569cd6">const</span> <span style="color: #4ec9b0">Duration</span><span><span style="color: #dfb976">(</span>minutes</span><span style="color: #d4d4d4">:</span> <span style="color: #b5cea8">2</span><span style="color: #dfb976">)</span><span style="color: #d4d4d4">,</span>
+  errorWindowAfter<span style="color: #d4d4d4">:</span> <span style="color: #569cd6">const</span> <span style="color: #4ec9b0">Duration</span><span><span style="color: #dfb976">(</span>seconds</span><span style="color: #d4d4d4">:</span> <span style="color: #b5cea8">10</span><span style="color: #dfb976">)</span><span style="color: #d4d4d4">,</span><span>
+<span style="color: #5caeef">)</span></span><span style="color: #d4d4d4">;</span>
+</span></code></pre>
+                </div>
+                <p>
+                  Both apply to every session in the app run, and a negative value is treated as zero. The 5-second mark interval is fixed.
+                </p>
+                <ul>
+                  <li>
+                    A longer <code>errorWindowBefore</code> means larger error uploads and a larger pre-roll in memory. It doesn't change what is captured.
+                  </li>
+                  <li>
+                    A longer <code>errorWindowAfter</code> delays the upload of a session that errors and keeps running in the foreground. A shorter one shows less of what happened after the error.
+                  </li>
+                </ul>
+                <h2 id="where-picto-does-nothing" anchor="true"><span>Where Picto does nothing</span><a href="/recording/errors#where-picto-does-nothing">#</a></h2>
+                <p>
+                  Under a test binding, such as <code>testWidgets</code>, <code>flutter_driver</code> or <code>integration_test</code>, Picto isn't the live binding and can't record anything. It starts no error session, runs no pre-roll and arms no timer. See 
+                  <a href="/recording/testing">Testing</a>.
+                </p>
+                <p>
+                  If starting a session for an error fails, Picto doesn't throw from inside the framework's error handler. It prints this instead:
+                </p>
+                <div class="code-block">
+                  <!--@jaspr_content:code_block_copy_button-->
+                  <button>
+                    <svg fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" width="18px" height="18px">
+                      <rect rx="2" ry="2" x="8" y="8" width="14" height="14"></rect>
+                      <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"></path>
+                    </svg>
+                  </button>
+                  <!--/@jaspr_content:code_block_copy_button-->
+                  <pre><code><span style="color: #b9eeff"><span><span style="color: #5caeef">[</span>Picto<span style="color: #5caeef">]</span> failed to start a recording session for an uncaught error: &lt;error&gt;
+</span></span></code></pre>
+                </div>
+                <h2 id="what-you-see-in-the-dashboard" anchor="true">
+                  <span>What you see in the dashboard</span><a href="/recording/errors#what-you-see-in-the-dashboard">#</a>
+                </h2>
+                <p>
+                  The session has <code>hadError</code> set to <code>true</code> and a captured exception with its type, message and stack trace. See 
+                  <a href="/dashboard/finding-and-watching-sessions">Finding &amp; Watching Sessions</a>.
+                </p>
+              </section>
+              <div class="content-footer">
+                <nav class="page-nav" aria-label="Pagination">
+                  <a class="page-nav-link page-nav-prev" href="/recording/how-sessions-work"><span class="page-nav-label">Previous</span><span class="page-nav-title">How Sessions Work</span></a>
+                  <a class="page-nav-link page-nav-next" href="/recording/sampling"><span class="page-nav-label">Next</span><span class="page-nav-title">Sampling</span></a>
+                </nav>
+              </div>
+            </div>
+            <aside class="toc">
+              <div>
+                <h3>On this page</h3>
+                <ul>
+                  <li style="padding-left: 0em"><a href="/recording/errors#which-errors-picto-sees">Which errors Picto sees</a></li>
+                  <li style="padding-left: 0em"><a href="/recording/errors#when-nothing-is-recording">When nothing is recording</a></li>
+                  <li style="padding-left: 0.75em"><a href="/recording/errors#one-session-per-error">One session per error</a></li>
+                  <li style="padding-left: 0em"><a href="/recording/errors#when-a-session-is-recording">When a session is recording</a></li>
+                  <li style="padding-left: 0em"><a href="/recording/errors#the-capture-window">The capture window</a></li>
+                  <li style="padding-left: 0.75em"><a href="/recording/errors#after-the-window-closes">After the window closes</a></li>
+                  <li style="padding-left: 0.75em"><a href="/recording/errors#an-error-in-the-background">An error in the background</a></li>
+                  <li style="padding-left: 0.75em"><a href="/recording/errors#when-there-is-no-lookback">When there is no lookback</a></li>
+                  <li style="padding-left: 0em"><a href="/recording/errors#change-the-window">Change the window</a></li>
+                  <li style="padding-left: 0em"><a href="/recording/errors#where-picto-does-nothing">Where Picto does nothing</a></li>
+                  <li style="padding-left: 0em"><a href="/recording/errors#what-you-see-in-the-dashboard">What you see in the dashboard</a></li>
+                </ul>
+              </div>
+            </aside>
+          </div>
+        </main>
+      </div>
+    </div>
+  </body>
+</html>

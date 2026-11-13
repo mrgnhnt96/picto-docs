@@ -1,0 +1,1073 @@
+{
+  "v": 1,
+  "docs": [
+    {
+      "u": "/",
+      "t": "Picto",
+      "d": "What Picto records, and where to start.",
+      "g": "",
+      "s": [
+        {
+          "b": "Picto records what a user sees and does in your Flutter app (screens, taps, scrolls, navigation and errors) and plays it back in the dashboard as a replay you can step through frame by frame. A recording isn't video. It stores what your app drew, so it stays sharp at any zoom and is a fraction of the size of a screen capture."
+        },
+        {
+          "h": "Two calls to record a session",
+          "a": "two-calls-to-record-a-session",
+          "b": "Picto.setup wires the recorder into your app, and Picto.startRecording starts a session: import 'package:flutter/material.dart'; import 'package:picto/picto.dart'; void main() { Picto.setup( apiKey: const String.fromEnvironment('PICTO_API_KEY'), appVersion: '1.0.0', ); runApp(const MyApp()); Picto.startRecording(); } The API key is the only thing to configure. It tells Picto which client app a recording belongs to, and the SDK already knows where to send it. A session ends and uploads on its own when the app goes to the background. Nothing records until your code calls Picto.startRecording(), with one exception: an uncaught error starts a session so the replay shows what led up to it. See Errors. Install the SDK, record a session and watch it in the dashboard. What a recording holds, what never leaves the device, and how to mask more."
+        },
+        {
+          "h": "Where to go next",
+          "a": "where-to-go-next",
+          "b": "These pages cover the rest: Recording sessions: start, restart and end a session, and read what happened to the upload. Adding context: tags, events, screens and a user id, so you can find a session later. Finding and watching sessions: the dashboard's lists, filters and replay viewer. Giving an agent access: let a coding agent read sessions with picto:sessions and picto:mcp. SDK API reference: every public item in package:picto/picto.dart."
+        }
+      ]
+    },
+    {
+      "u": "/getting-started/quick-start",
+      "t": "Quick Start",
+      "d": "Install the SDK and upload a first recording.",
+      "g": "Start Here",
+      "s": [
+        {
+          "b": "Add the SDK to your Flutter app, record a session, and see it arrive in the dashboard."
+        },
+        {
+          "h": "Prerequisites",
+          "a": "prerequisites",
+          "b": "Flutter 3.44.0 or newer. The package needs Dart ^3.12.0, which Flutter 3.44.0 is the first to ship. On an older Flutter, flutter pub add picto fails with a version-solving error. A Picto organization with an active plan. Without one, the server refuses every upload. See Plans and retention."
+        },
+        {
+          "h": "Install the package",
+          "a": "install-the-package",
+          "b": "Add picto from pub.dev: flutter pub add picto Installation needs nothing registered in native code and no Gradle or Podfile change. Android and macOS apps need a network permission to upload; add it now from Platform support, or a macOS build and an Android release build can't send anything."
+        },
+        {
+          "h": "Get an API key",
+          "a": "get-an-api-key",
+          "b": "Create a client app in the dashboard and copy its API key, which starts with oc_. The dashboard's Get started page walks you through both. See Account and team for client apps and keys. The key is all the SDK needs: it decides which client app, and so which organization, a recording belongs to. There's no server URL or account id to configure."
+        },
+        {
+          "h": "Set up and start recording",
+          "a": "set-up-and-start-recording",
+          "b": "Call Picto.setup first in main(), then start a session after runApp: import 'package:flutter/material.dart'; import 'package:picto/picto.dart'; void main() { Picto.setup( apiKey: const String.fromEnvironment('PICTO_API_KEY'), appVersion: '1.0.0', ); runApp(const MyApp()); Picto.startRecording(); } MyApp is your app's root widget. Set appVersion to your app's version; the dashboard shows it beside each session. Picto.setup has to come before anything else that initializes a binding, including your own WidgetsFlutterBinding.ensureInitialized() and any plugin call that makes one. Picto installs the app's WidgetsBinding itself and returns it, so you can drop your own ensureInitialized() call. If anything gets there first, nothing is recorded; see Picto is not recording. Picto.setup doesn't start a session. Only Picto.startRecording() does, so you can call it wherever recording should begin, such as after a consent screen."
+        },
+        {
+          "h": "Run the app with your key",
+          "a": "run-the-app-with-your-key",
+          "b": "Pass the key when you run or build, so it stays out of source control: flutter run --dart-define=PICTO_API_KEY=oc_... Replace oc_... with your key. PICTO_API_KEY is only the name main() reads with String.fromEnvironment; you can pick another. The key is compiled in, so a hot reload or hot restart keeps the old value. Stop the app and run the command again after changing it."
+        },
+        {
+          "h": "End the session",
+          "a": "end-the-session",
+          "b": "A session uploads when it ends, not while it records. End it in any of these ways: iOS and Android: send the app to the background. macOS: minimize or hide the window, or cover it with another one. Web: switch to another tab, or minimize or cover the browser window. Any platform: call Picto.endSessionAndUpload(), for example from a debug button. Picto.endSessionAndUpload() returns true once the recording reached the server: final uploaded = await Picto.endSessionAndUpload(); false doesn't always mean a failure. A failed upload is queued on the device and sent again later, and the SDK retries it at the next launch and when the app returns to the foreground. See Recording sessions to tell the outcomes apart. Bringing the app back to the foreground starts recording again. A quick return continues the same session."
+        },
+        {
+          "h": "Check that it arrived",
+          "a": "check-that-it-arrived",
+          "b": "Open the dashboard. Get started shows Your first session arrived, and the session is listed under Sessions. Select Watch replay to play it back. See Finding and watching sessions. If nothing arrives, start with the debug console: Picto prints a line starting with [Picto] for most causes. Troubleshooting lists each one and its fix."
+        },
+        {
+          "h": "Next steps",
+          "a": "next-steps",
+          "b": "Recording sessions: restart and end sessions from your own code. What gets recorded: what a recording holds, and how to mask more of it. Adding context: tags, events, screens and a user id."
+        }
+      ]
+    },
+    {
+      "u": "/getting-started/platform-support",
+      "t": "Platform Support",
+      "d": "Where Picto records, and the network permission each platform needs.",
+      "g": "Start Here",
+      "s": [
+        {
+          "b": "Picto records and uploads on iOS, Android, macOS and the web. Linux and Windows aren't supported yet."
+        },
+        {
+          "h": "Platforms",
+          "a": "platforms",
+          "b": "Each upload is an HTTPS request from your app to https://api.picto.dev. Picto never adds the permission that request needs, so your app grants it, the same as for any other request: Platform Status What your app adds iOS Supported Nothing Android Supported The INTERNET permission macOS Supported The com.apple.security.network.client entitlement Web Supported Nothing, unless your site sets a Content Security Policy Linux Not supported yet Not applicable Windows Not supported yet Not applicable"
+        },
+        {
+          "h": "Toolchain",
+          "a": "toolchain",
+          "b": "The package needs Dart ^3.12.0 and Flutter 3.44.0 or newer, the first Flutter release that ships Dart 3.12.0."
+        },
+        {
+          "h": "iOS",
+          "a": "ios",
+          "b": "Nothing to add. An iOS app can make outbound HTTPS requests without asking."
+        },
+        {
+          "h": "Android",
+          "a": "android",
+          "b": "Add the INTERNET permission to android/app/src/main/AndroidManifest.xml, above : Flutter's template puts INTERNET only in the debug and profile manifests. Without it in main, a debug build uploads and a release build fails every upload with Failed host lookup, even on a device that's online. Picto's own manifest adds one permission to your app, ACCESS_NETWORK_STATE. Android grants it at install with no prompt. Android 14 and later need it to schedule the background job that lets a backgrounded app finish its upload. It doesn't let your app send anything, so you still need INTERNET."
+        },
+        {
+          "h": "macOS",
+          "a": "macos",
+          "b": "Add the com.apple.security.network.client entitlement to both macos/Runner/DebugProfile.entitlements and macos/Runner/Release.entitlements: com.apple.security.network.client A Flutter macOS app runs in the App Sandbox, which blocks outbound connections without this entitlement, and Flutter's template doesn't include it. Check both files: one build type can upload while the other can't."
+        },
+        {
+          "h": "Web",
+          "a": "web",
+          "b": "Picto works with flutter build web and flutter build web --wasm, with no web-specific setup. Two things depend on your site: Content Security Policy. If your site sends a Content-Security-Policy header, its connect-src directive has to allow https://api.picto.dev, or the browser blocks the upload. Unsent recordings wait in IndexedDB. A recording that can't go out, for example because the visitor is offline or the tab closed mid-upload, is kept in the browser's IndexedDB and sent on the visitor's next visit to your site. The dashboard labels a session recorded in a browser as web, whatever operating system the visitor's browser runs on. Filter on web to see only those sessions."
+        },
+        {
+          "h": "Linux and Windows",
+          "a": "linux-and-windows",
+          "b": "Picto isn't supported on Linux or Windows yet. It isn't tested on either, so don't ship a build for them that depends on recordings arriving."
+        }
+      ]
+    },
+    {
+      "u": "/getting-started/troubleshooting",
+      "t": "Troubleshooting",
+      "d": "Symptoms, their causes, and the fix.",
+      "g": "Start Here",
+      "s": [
+        {
+          "b": "Find the symptom or console message you see, then apply its fix. Picto prints a line starting with [Picto] to the debug console for most of these causes, and each entry quotes it."
+        },
+        {
+          "h": "No session arrives and the console is quiet",
+          "a": "no-session-arrives-and-the-console-is-quiet",
+          "b": "A session uploads when it ends, not while it records. An app left open on screen has nothing to send yet, and nothing has gone wrong, so the console says nothing. End the session: iOS and Android: send the app to the background. macOS: minimize or hide the window, or cover it with another one. A window that's visible but lost focus keeps recording. Web: switch to another tab, or minimize or cover the browser window. Any platform: call Picto.endSessionAndUpload(). If the app was killed while recording, for example stopped from your IDE, it had no chance to upload. Picto saves the live session every 30 seconds, so launch the app again. It sends what it saved, which can miss up to the last 30 seconds, and prints: [Picto] Recovered segment from a checkpoint If the console is still quiet, check that your code calls Picto.startRecording(). Picto.setup doesn't start a session, and code that never runs, such as a start behind a consent screen nobody passed, records nothing. Picto.isRecording is true while a session records."
+        },
+        {
+          "h": "The console says Picto is not recording",
+          "a": "the-console-says-picto-is-not-recording",
+          "b": "A debug build throws this error just after its first frame: Picto is not recording: the recording binding is not the live WidgetsBinding. Profile and release builds don't throw. They print one of these lines instead: [Picto] A WidgetsBinding was already initialized before Picto.setup() ran, so the recording binding could not be installed and NOTHING WILL BE RECORDED. Or: [Picto] startRecording() was called but the recording binding is NOT the live WidgetsBinding, so this session will capture no draw calls and will be DISCARDED rather than uploaded. Cause: Picto has to be the app's WidgetsBinding to see what the app draws. Either a binding existed before Picto.setup() ran, or something replaced Picto's afterwards. Every session in that run is discarded instead of uploaded. Fix: If your own WidgetsFlutterBinding.ensureInitialized(), or a plugin call that makes one, comes before Picto.setup(), move Picto.setup() above it so it's the first call in main(). If the app runs under flutter_driver's enableFlutterDriverExtension() or under integration_test, a session can't be recorded there. Both install a binding of their own. Run the app normally to record. See Testing. To check from code, "
+        },
+        {
+          "h": "The console says the run was not sampled",
+          "a": "the-console-says-the-run-was-not-sampled",
+          "b": "The console prints: [Picto] startRecording() did nothing: this run was not sampled. Cause: the app records only a share of its runs, and this run wasn't picked. The share is set per app by its owner in the dashboard under App settings → Recording. Until the device has heard from the server, it falls back to the build's --dart-define=PICTO_SAMPLING_PERCENTAGE, which defaults to 100. An uncaught error is still uploaded on a run that wasn't sampled. Fix: for testing, set the app's rate to 100 in the dashboard and launch the app again. See Sampling for when a new rate reaches a device."
+        },
+        {
+          "h": "The console says it did not start a new session",
+          "a": "the-console-says-it-did-not-start-a-new-session",
+          "b": "The console prints: [Picto] did not start a new session: this install already started 30 in the last hour Cause: one install starts at most 30 new sessions an hour, counted across launches. The number in the message is the limit in effect. Fix: wait until the time the message gives, or raise the limit with Picto.setup(maxNewSessionsPerHour: ...). A start within the background timeout of the previous end continues that session and doesn't count. See Recording sessions."
+        },
+        {
+          "h": "endSessionAndUpload returns false",
+          "a": "endsessionandupload-returns-false",
+          "b": "Picto.endSessionAndUpload() returns true only when the recording reached the server. false covers three different outcomes. Call Picto.endSessionAndUploadOutcome() instead to get a PictoSessionEndOutcome that says which: Outcome What happened What to do uploaded The recording reached the server. The only outcome that returns true. Nothing. uploadFailed The session ended, but the upload didn't go through. The recording is queued on the device. Read the [Picto] line the upload printed and find it on this page. The SDK re-sends the queue at the next launch and when the app returns to the foreground. nothingRecording Nothing was recording, so there was nothing to end. No request was made and nothing was queued. Usually nothing. A session ends on its own when the app goes to the background, and an error's session ends about 30 seconds after the error. Check Picto.isRecording first if this matters. recordingPipelineAbsent Picto isn't the live WidgetsBinding, so the session was empty. It ended without an upload. Expected in widget and integration_test tests. In a real run, see The console says Picto is not recording. nothingRecording also prints: [Picto] endSessionAndUpload() was called w"
+        },
+        {
+          "h": "The upload is refused with HTTP 403",
+          "a": "the-upload-is-refused-with-http-403",
+          "b": "The console prints: [Picto] The backend refused this recording with HTTP 403 Cause: one of these, checked by the server in this order: 1. The API key matches no client app. The run command left the key out, so the app sent an empty one, or the key is wrong or was regenerated. 2. The organization has no plan. The dashboard shows Uploads are stopped: this organization has no plan yet. and Get started shows Waiting for a plan. 3. The plan isn't active. The dashboard shows a banner such as Uploads are stopped: your last payment failed. or Uploads are stopped: this plan has ended. 4. The organization has used all its sessions this billing period, its plan's sessions plus the overage buffer. The dashboard shows Uploads are stopped: this organization has used all its sessions this period. The server checks the key first, so a wrong key gets this 403 even with an active plan. Fix: For a key problem, copy the key from the client app in the dashboard, stop the app and run it again with the key. A hot reload or hot restart keeps the old value. flutter run --dart-define=PICTO_API_KEY=oc_... For a plan problem, choose a plan, sort out billing or upgrade under Organization in the dashboard. See "
+        },
+        {
+          "h": "The upload is refused with HTTP 429",
+          "a": "the-upload-is-refused-with-http-429",
+          "b": "The console prints: [Picto] The backend refused this recording with HTTP 429 Cause: an upload rate limit, not a problem with the recording or the key. Each device can upload 20 recordings every 5 minutes, and each app has a larger allowance over the same 5 minutes, set by its plan. A device looping short test sessions reaches the device limit first. Fix: wait. The recording is queued, and the SDK sends it at the next launch, or when the app returns to the foreground at least 5 minutes after its last attempt."
+        },
+        {
+          "h": "The backend can't be reached",
+          "a": "the-backend-cant-be-reached",
+          "b": "The console prints: [Picto] Could not reach the backend to upload a recording Cause: the upload never got an answer from https://api.picto.dev. The message ends with Last transport error: and the error, which points to the cause: Last error Cause Fix Failed host lookup on Android, on a device that's online The app has no INTERNET permission. Flutter adds it to debug builds only. Add it to android/app/src/main/AndroidManifest.xml. See Android setup. Any connection error on macOS The app has no com.apple.security.network.client entitlement. Add it to both entitlements files. See macOS setup. Any error on the web The site's Content Security Policy blocks the request, or the browser is offline. Allow https://api.picto.dev in connect-src. See Web setup. Any error, on a device that's offline The device has no connection. Reconnect the device. The recording is queued, not lost. The SDK re-sends it at the next launch and when the app returns to the foreground."
+        },
+        {
+          "h": "The session went to another client app",
+          "a": "the-session-went-to-another-client-app",
+          "b": "Cause: the console shows no errors and the upload succeeded, but the app ran with another client app's key. A session goes to the client app its key belongs to. Fix: check that the key in the run command belongs to the client app you're looking at. A session already sent stays with the other client app."
+        },
+        {
+          "h": "picto:sessions exits with code 5",
+          "a": "pictosessions-exits-with-code-5",
+          "b": "dart run picto:sessions exits with code 5 and prints: Agent access needs an active Picto plan or invite trial. Subscribe in your organization's billing settings (Organization → Plan and usage): With --json, the error object carries \"code\": \"plan_required\" and the upgradeUrl. Cause: the organization has no active plan. Signing in again doesn't help. Fix: choose a plan at the URL in the message, then run the command again. See Giving an agent access."
+        }
+      ]
+    },
+    {
+      "u": "/recording/recording-sessions",
+      "t": "Recording Sessions",
+      "d": "Start, restart and end a session.",
+      "g": "Recording",
+      "s": [
+        {
+          "b": "Call Picto.startRecording() to begin a session, and Picto.endSessionAndUploadOutcome() or Picto.restartRecording() when you want to end one yourself. Picto also ends and uploads sessions on its own, as described in How Sessions Work. You need Picto.setup in main() before any of these calls. See Quick Start."
+        },
+        {
+          "h": "Start a session",
+          "a": "start-a-session",
+          "b": "Picto.setup doesn't start recording. Call startRecording() where your app decides recording should begin, such as right after runApp() or after a consent screen: import 'package:flutter/material.dart'; import 'package:picto/picto.dart'; void main() { Picto.setup( apiKey: const String.fromEnvironment('PICTO_API_KEY'), appVersion: '1.0.0', ); runApp(const MaterialApp(home: Placeholder())); Picto.startRecording(); } startRecording() returns void and does nothing in these cases: A session is already recording. The running session keeps its id and its clock. To cut a new session, use restartRecording(). This run wasn't picked by sampling. The console says so once per run. This install already started maxNewSessionsPerHour new sessions in the last hour. See Limit new sessions per hour."
+        },
+        {
+          "h": "A quick start continues the last session",
+          "a": "a-quick-start-continues-the-last-session",
+          "b": "If you call startRecording() less than backgroundTimeout (30 seconds by default) after your own endSessionAndUpload(), Picto doesn't open a new session. The new recording is the next segment of the one you ended: same session_id, next sequence. An app that starts recording when a screen opens and ends it when the screen closes gets one session per visit, not one per screen. A start always opens a new session when: the gap is backgroundTimeout or longer; the session you ended had recorded an uncaught error; you set backgroundTimeout: Duration.zero in Picto.setup. If your endSessionAndUpload() is still saving the previous segment, the start waits for that save before recording begins, so Picto.isRecording can read false for a few milliseconds."
+        },
+        {
+          "h": "Check whether a session is recording",
+          "a": "check-whether-a-session-is-recording",
+          "b": "Picto.isRecording is true while a session is live, whether you started it or an uncaught error did: import 'package:flutter/foundation.dart'; import 'package:picto/picto.dart'; void logRecordingState() { debugPrint('Picto recording: ${Picto.isRecording}'); } The in-memory lookback buffer Picto keeps for errors isn't a session, so isRecording stays false while only that runs. See Errors."
+        },
+        {
+          "h": "End a session",
+          "a": "end-a-session",
+          "b": "Call endSessionAndUploadOutcome() to end the session and upload it at a moment you choose, such as a \"Report a bug\" button or a sign-out. It returns a PictoSessionEndOutcome: import 'package:flutter/foundation.dart'; import 'package:picto/picto.dart'; Future reportBug() async { final outcome = await Picto.endSessionAndUploadOutcome( metadata: {'trigger': 'report_bug'}, ); switch (outcome) { case PictoSessionEndOutcome.uploaded: debugPrint('Session uploaded.'); case PictoSessionEndOutcome.uploadFailed: debugPrint('Upload failed; the session is queued for a retry.'); case PictoSessionEndOutcome.nothingRecording: debugPrint('No session was recording.'); case PictoSessionEndOutcome.recordingPipelineAbsent: debugPrint('Picto is not the live binding, so nothing was recorded.'); } } Outcome What happened uploaded The recording reached the backend. uploadFailed The upload didn't succeed. The recording stays in the pending-upload queue and Picto retries it, unless the backend refused it as malformed (400). The console names the error. See How Sessions Work. nothingRecording No session was live, so nothing was sent or queued. This is common: going to the background ends a session, and so doe"
+        },
+        {
+          "h": "Restart a session",
+          "a": "restart-a-session",
+          "b": "Call restartRecording() to end the current session, upload it, and start a new session with its own session_id. Use it at a boundary that matters to you, such as a user signing out or a checkout flow starting: import 'package:flutter/foundation.dart'; import 'package:picto/picto.dart'; Future onSignOut() async { final outcome = await Picto.restartRecording( metadata: {'reason': 'signed_out'}, ); if (outcome == null) { debugPrint('Not restarted: sampled out or at the hourly session limit.'); } } It returns the PictoSessionEndOutcome of the session that ended, or null: Return value What happened uploaded, uploadFailed, recordingPipelineAbsent The old session ended with that outcome, and a new session is recording. nothingRecording Nothing was recording, and a new session is recording. You don't need to check isRecording first. null Nothing happened. This run was sampled out, or the install is at its hourly limit on new sessions. A live session keeps running. The new session starts as soon as the old one is saved to disk. The returned future waits for the upload, so on a slow connection it can complete well after the new session started. metadata goes with the ending session only. The"
+        },
+        {
+          "h": "Set the segment length limit",
+          "a": "set-the-segment-length-limit",
+          "b": "A single segment records for at most maxRecordingDuration, 10 minutes by default. When a segment you started reaches it, Picto uploads that segment and keeps recording the same session as its next segment. A long visit arrives as several segments under one session_id. The few events that arrive while the capped segment is being saved aren't recorded, and the next segment opens with a full frame of the screen. To change the limit, pass maxRecordingDuration to Picto.setup: Picto.setup( apiKey: const String.fromEnvironment('PICTO_API_KEY'), appVersion: '1.0.0', maxRecordingDuration: const Duration(minutes: 30), ); The value applies to every segment in the app run. A longer limit means fewer, larger uploads: a segment is held in memory until it ends and is sent in one request. Duration.zero records nothing. The limit doesn't apply while an error capture window is open. See Errors."
+        },
+        {
+          "h": "Limit new sessions per hour",
+          "a": "limit-new-sessions-per-hour",
+          "b": "Each install starts at most maxNewSessionsPerHour new sessions in any hour, 30 by default. The count is stored on the device and survives relaunches. To change it, pass maxNewSessionsPerHour to Picto.setup: Picto.setup( apiKey: const String.fromEnvironment('PICTO_API_KEY'), appVersion: '1.0.0', maxNewSessionsPerHour: 60, ); A value below 1 is treated as 1. Only a session with a new session_id counts. A continued segment never counts: a quick start after your own end, a quick return from the background, and a segment that follows the length limit. Sessions an uncaught error starts don't count and are never refused. A start past the limit does nothing, and isRecording stays false. The console prints this once, until a start is allowed again: [Picto] did not start a new session: this install already started 30 in the last hour, the ceiling set by Picto.setup(maxNewSessionsPerHour:). The next can start after . A start within backgroundTimeout of the previous end continues that session and is not counted, and an uncaught error still starts a session. A return from the background that would start a new session is refused the same way, and the app keeps only the error lookback buffer unti"
+        },
+        {
+          "h": "Check that it worked",
+          "a": "check-that-it-worked",
+          "b": "After startRecording(), Picto.isRecording is true. If it stays false, check the console for the sampling or hourly-limit message. End the session with endSessionAndUploadOutcome() and look for uploaded, then find the session in the dashboard. See Finding & Watching Sessions. If it doesn't arrive, see Troubleshooting."
+        }
+      ]
+    },
+    {
+      "u": "/recording/how-sessions-work",
+      "t": "How Sessions Work",
+      "d": "Segments, backgrounding, saving on exit, and uploads.",
+      "g": "Recording",
+      "s": [
+        {
+          "b": "A session is one visit to your app, and it reaches the backend as one or more segments. Each segment is a complete recording, uploaded in its own request when it ends. Picto ends and uploads segments on its own, so once a session is recording you don't need to call anything else."
+        },
+        {
+          "h": "Sessions and segments",
+          "a": "sessions-and-segments",
+          "b": "Every upload carries a session_id and a sequence. The session_id is shared by every segment of a session, and sequence counts the segments from 0. A session that ended without being split has one segment, with sequence 0. Segments are ordered by sequence, not by arrival. A segment that waited in the pending-upload queue for a day still sorts into its place. A session counts once toward your plan however many segments it has. See Plans & Retention."
+        },
+        {
+          "h": "What ends a segment",
+          "a": "what-ends-a-segment",
+          "b": "These end the live segment and upload it: Trigger What follows The app goes to the background The same session continues if the app returns within backgroundTimeout. See Going to the background. The segment reaches maxRecordingDuration (10 minutes by default) The next segment of the same session starts straight away. Your endSessionAndUpload() or restartRecording() See Recording Sessions. The error capture window closes Picto goes back to its error lookback buffer. See Errors. The app exits The segment is saved to the queue and sent at the next launch. See When the app is killed. A segment that continues the same session is a new recording. Its clock starts at zero, and its hadError describes only that segment. Tags set with Picto.setTag don't carry into it; the user named by Picto.identify does. See Adding Context."
+        },
+        {
+          "h": "Going to the background",
+          "a": "going-to-the-background",
+          "b": "When the app goes to the background, Picto ends the live segment and starts uploading it at once. It doesn't hold the recording in memory in case the user comes back, because the OS can kill a backgrounded app at any moment. What backgroundTimeout decides is the session id. It's 30 seconds by default, and Picto checks it when the app returns: Time away The next segment is Less than backgroundTimeout The same session, at the next sequence backgroundTimeout or longer A new session, at sequence 0 To change it, pass backgroundTimeout to Picto.setup: Picto.setup( apiKey: const String.fromEnvironment('PICTO_API_KEY'), appVersion: '1.0.0', backgroundTimeout: const Duration(minutes: 2), ); A negative value is treated as Duration.zero, which makes every return start a new session. The same window decides whether your own end followed by a quick startRecording() continues a session. A new session started on return counts toward maxNewSessionsPerHour. On macOS and the web, a window that is minimized, hidden or fully covered, and a browser tab the user switched away from, counts as the background. A window that only loses focus keeps recording."
+        },
+        {
+          "h": "When recording doesn't resume",
+          "a": "when-recording-doesnt-resume",
+          "b": "Picto starts recording again on return only for a session it ended itself, in an app that called startRecording(). In these cases it doesn't: You ended the session. Your endSessionAndUpload() means stop. Call startRecording() to begin again. You never called startRecording(). The only session such an app has is one an uncaught error started, and that error buys one session. On return, Picto runs only its error lookback buffer. The session had recorded an uncaught error. Its id is retired. If you called startRecording(), the return starts a new session at sequence 0. Sampling declined this run. Picto checks the sampling decision again on return. See Sampling. The app was killed while away. The next launch starts fresh. The segment from before the kill was already uploaded or queued."
+        },
+        {
+          "h": "When the app is killed",
+          "a": "when-the-app-is-killed",
+          "b": "Picto saves the live segment so a kill without warning loses as little as possible: On inactive, such as when the iOS app switcher opens, Picto writes a checkpoint of the live segment to disk. It doesn't end the segment, because inactive is also the notification shade and Control Center. Every 30 seconds while a segment is recording something new, Picto rewrites the checkpoint. This covers exits with no lifecycle event at all, such as an iPad app in a resized window. If the process dies, the next launch finds the checkpoint and sends it under its original session_id and sequence. A kill with no warning loses at most about the last 30 seconds. When the app returns from inactive the checkpoint is deleted, so a kill in the 30 seconds after that loses the segment. Some exits wait for the segment to be saved: Android Back on the root route closes the app. While a session is recording, Picto holds that exit until the segment is in the queue, for at most 2 seconds. Your PopScopes and routes handle Back first, as usual. In an app that opts into predictive back, Picto keeps Back with Flutter while recording so the exit goes through this hold. The app then loses the back-to-home animation fo"
+        },
+        {
+          "h": "Uploading a segment",
+          "a": "uploading-a-segment",
+          "b": "A segment is uploaded whole, in one request. Before the first attempt, Picto writes it to the pending-upload queue on disk, and it leaves the queue only when the backend accepts it. A process that dies mid-upload doesn't lose it. Exceptions, slow frames and tap clusters from the segment are sent after the recording is accepted, never before. If the recording is queued, they're queued with it."
+        },
+        {
+          "h": "Retries and timeouts",
+          "a": "retries-and-timeouts",
+          "b": "Picto makes up to 4 attempts, waiting 1, 4 and 16 seconds between them. Whether it tries again depends on the response: Response What Picto does No response (offline, DNS or TLS failure, timeout) or 503 Retries. After the last attempt, the segment stays queued. 429 (rate limited) Stays queued without retrying. See Rate limits. 400 (the recording can never be stored, such as empty data) Drops it and says so on the console. The same bytes would be refused again. 403 or any other status Doesn't retry. The segment stays queued and the console names the status. For 403, see Troubleshooting. Each attempt waits up to 120 seconds, plus time to send the body at 2,000 bytes per second, so a large segment on a slow link isn't cut off."
+        },
+        {
+          "h": "Background upload time",
+          "a": "background-upload-time",
+          "b": "Android and iOS cut off a backgrounded app's network within seconds, which a slow connection or a long segment won't survive. While the upload a backgrounding started is running, Picto's plugin keeps the app able to send it: Android 12 and later: an expedited job. If the system tears down the Flutter engine while the process lives, the plugin sends the queue itself. iOS: a background task, which iOS allows for about 30 seconds. An upload still running when it expires is handed to a background URLSession, which iOS finishes even while the app is suspended. Neither asks the user for a permission or shows anything. The OS can still stop either early. An upload that doesn't finish stays queued. On the web and macOS the app keeps running in the background, so nothing extra is needed."
+        },
+        {
+          "h": "The pending-upload queue",
+          "a": "the-pending-upload-queue",
+          "b": "A segment that isn't accepted stays in the queue and is sent later. The queue holds at most 50 entries and 100 MB; past that, the oldest entries are removed. The newest entry is always kept. By default the queue lives in a private directory that survives app updates: no_backup/ on Android and Library/Application Support/ on iOS and macOS. On the web it's in the browser's IndexedDB. To choose the directory, pass pendingUploadsDir to Picto.setup, and pick one that also survives updates. Each entry stores everything needed to send it again, except the API key: a queued segment is sent with the key the app is running with now."
+        },
+        {
+          "h": "Draining the queue",
+          "a": "draining-the-queue",
+          "b": "Picto sends the queue on its own: once at Picto.setup; each time the app returns to the foreground. Both are limited to one drain every 5 minutes. The exception is a segment that was queued because the backend couldn't be reached: the next return drains it even inside the 5 minutes. A drain sends the oldest entries first and stops at the first 429, leaving the rest for the next drain. You don't need to call anything. To drain at a moment you know is better, such as when your own connectivity check reports the device is back online, call retryPendingUploads(): import 'dart:async'; import 'package:picto/picto.dart'; void onBackOnline() { unawaited(Picto.retryPendingUploads()); } A call made while a drain is running joins it instead of starting a second one, and it counts toward the 5-minute limit on automatic drains. It throws a StateError if Picto.setup was never called, and does nothing under a test binding."
+        },
+        {
+          "h": "Rate limits",
+          "a": "rate-limits",
+          "b": "The backend limits uploads per device and per app, in fixed 5-minute windows. A window starts at the first request and resets 5 minutes later, so a 429 clears within minutes, not seconds. Each device can send, per 5 minutes: Upload Limit Recordings (segments) 20 Exceptions 60 Rage-tap clusters 60 Slow-frame events 120 Each app has a larger budget for recordings that depends on its plan, per 5 minutes: Plan Recordings per app Starter 1,000 Growth 5,000 Scale 20,000 Enterprise 50,000 The app budget for exceptions and rage-tap clusters is three times the recording budget, and for slow-frame events six times. A device that starts many short sessions in a burst, such as a test device looping a flow, reaches the per-device limit first. Its segments stay queued and arrive a few minutes later. Nothing is lost."
+        }
+      ]
+    },
+    {
+      "u": "/recording/errors",
+      "t": "Errors",
+      "d": "How an uncaught error starts or extends a recording.",
+      "g": "Recording",
+      "s": [
+        {
+          "b": "An uncaught error is the one thing that starts a recording without your app asking. If a session is already recording, the error decides how much of it is uploaded and when it ends. You don't set anything up for this: Picto.setup installs the error hooks."
+        },
+        {
+          "h": "Which errors Picto sees",
+          "a": "which-errors-picto-sees",
+          "b": "Picto.setup adds a handler to FlutterError.onError (errors during build, layout and paint) and to PlatformDispatcher.instance.onError (errors from async code). It chains onto any handler already installed, so your own handlers and crash reporter still run, and Picto doesn't mark any error as handled. On the web, Flutter reports uncaught async errors as the browser's window error event, so Picto listens for that too. It acts only on errors thrown by Dart, and only reads the event. In a WebAssembly build the browser exposes nothing of the Dart error, so the captured exception has the type WebAssembly.Exception, a fixed message and no stack trace, and only the first such error in a run starts a session. To keep the details, run your app inside runZonedGuarded and pass what it catches to PlatformDispatcher.instance.onError."
+        },
+        {
+          "h": "When nothing is recording",
+          "a": "when-nothing-is-recording",
+          "b": "From Picto.setup on, whenever the app is in the foreground and no session is live, Picto keeps a rolling in-memory buffer of about the last errorWindowBefore (30 seconds by default) of the screen. This pre-roll has no session_id, is never written to disk and never uploads on its own. Picto.isRecording is false while it runs, and startRecording() discards it. When an uncaught error fires with nothing recording, Picto turns the pre-roll into a session on the spot. The replay opens about errorWindowBefore before the error. That session then follows the capture window like any other. This happens even on a run that sampling declined, because a run nobody was watching is the case it exists for. At a sampling rate of 0, error sessions are the only sessions you get. Error sessions also don't count toward maxNewSessionsPerHour and are never refused by it."
+        },
+        {
+          "h": "One session per error",
+          "a": "one-session-per-error",
+          "b": "An uncaught error buys one session, not recording for the rest of the run. When the app returns from the background afterwards, Picto doesn't start another session; it runs only the pre-roll. To keep recording after an error, call Picto.startRecording(). Picto remembers each error it has started a session for, by its type, message and the top six frames of its stack, until the app restarts. The same error firing again later doesn't start another session. A different error does. Picto remembers up to 256 errors and forgets the oldest past that."
+        },
+        {
+          "h": "When a session is recording",
+          "a": "when-a-session-is-recording",
+          "b": "An error during a live session is recorded into that session; it never starts a second one. The first error of the session opens its capture window. Later errors are recorded too, but don't move or extend the window."
+        },
+        {
+          "h": "The capture window",
+          "a": "the-capture-window",
+          "b": "A session with an uncaught error doesn't upload whole. It uploads a window around the session's first error. Before the error, the window keeps at least errorWindowBefore. It starts at a mark Picto takes every 5 seconds, so the real lookback is between errorWindowBefore and errorWindowBefore plus 5 seconds. If the error came earlier than that in the session, the window starts at the beginning of the session. After the error, the session ends and uploads at whichever comes first: errorWindowAfter (30 seconds by default) passes; the app goes to the background; you end the session. The timer is a ceiling, and going to the background usually gets there first. The session uploads once, whichever wins. The replay's timeline starts at the window, not at the session's start. Record five minutes, throw at the two-minute mark, and the replay runs about one minute, with the error about 30 seconds in. A short replay of a long session with hadError is the window working, not a lost recording. While the window is open, the segment doesn't split at maxRecordingDuration."
+        },
+        {
+          "h": "After the window closes",
+          "a": "after-the-window-closes",
+          "b": "When the window closes, Picto uploads the session and goes back to the pre-roll, so the next error gets its full lookback too. No session starts because a window closed. If your app called startRecording(), recording resumes the next time the app returns to the foreground, as a new session at sequence 0. The errored session's id is retired, even when going to the background is what closed the window. Until then only the pre-roll runs. Call startRecording() to resume sooner. A resumed session counts toward maxNewSessionsPerHour."
+        },
+        {
+          "h": "An error in the background",
+          "a": "an-error-in-the-background",
+          "b": "Nothing is drawn in the background, so the useful window is the one before the user left. When the app goes to the background, Picto keeps the last errorWindowBefore in memory: the pre-roll if nothing was recording, or the end of your session if something was. Your session still ends and uploads as usual. An error thrown in the background, such as from a timer or a push handler, turns what was kept into its own session with a new session_id. The replay opens about errorWindowBefore before the app left and ends with the error. It uploads straight away, since there is no after-window to wait for. Returning to the foreground discards what was kept."
+        },
+        {
+          "h": "When there is no lookback",
+          "a": "when-there-is-no-lookback",
+          "b": "An error that fires before Picto has finished setting up, or after the app left with nothing to keep, still starts a session, but the replay opens on the error. The first time this happens in a run, the console says so: [Picto] started a recording for an uncaught error, and this one has NO before-window: nothing was capturing when the error fired, so the upload begins AT the exception instead of 30s in front of it. errorWindowBefore can only keep bytes that were already captured, and picto only keeps them after setup: either the error fired before picto finished setting up, or the app left before there was anything to keep. Said once per process. The number is your errorWindowBefore, so the message also confirms the value reached the SDK."
+        },
+        {
+          "h": "Change the window",
+          "a": "change-the-window",
+          "b": "Pass errorWindowBefore and errorWindowAfter to Picto.setup: Picto.setup( apiKey: const String.fromEnvironment('PICTO_API_KEY'), appVersion: '1.0.0', errorWindowBefore: const Duration(minutes: 2), errorWindowAfter: const Duration(seconds: 10), ); Both apply to every session in the app run, and a negative value is treated as zero. The 5-second mark interval is fixed. A longer errorWindowBefore means larger error uploads and a larger pre-roll in memory. It doesn't change what is captured. A longer errorWindowAfter delays the upload of a session that errors and keeps running in the foreground. A shorter one shows less of what happened after the error."
+        },
+        {
+          "h": "Where Picto does nothing",
+          "a": "where-picto-does-nothing",
+          "b": "Under a test binding, such as testWidgets, flutter_driver or integration_test, Picto isn't the live binding and can't record anything. It starts no error session, runs no pre-roll and arms no timer. See Testing. If starting a session for an error fails, Picto doesn't throw from inside the framework's error handler. It prints this instead: [Picto] failed to start a recording session for an uncaught error:"
+        },
+        {
+          "h": "What you see in the dashboard",
+          "a": "what-you-see-in-the-dashboard",
+          "b": "The session has hadError set to true and a captured exception with its type, message and stack trace. See Finding & Watching Sessions."
+        }
+      ]
+    },
+    {
+      "u": "/recording/sampling",
+      "t": "Sampling",
+      "d": "Record a share of app runs.",
+      "g": "Recording",
+      "s": [
+        {
+          "b": "Sampling records a percentage of app runs. At each launch Picto decides once whether the run is recorded, and on a run that isn't, Picto.startRecording() does nothing. The default is 100, which records every run."
+        },
+        {
+          "h": "Set the rate in the dashboard",
+          "a": "set-the-rate-in-the-dashboard",
+          "b": "The owner of the organization sets the rate per app: 1. Open the app in the dashboard. 2. Go to App settings. 3. Under Recording, enter a whole number from 0 to 100 in Sampling rate. 4. Select Save. Collaborators see the rate but can't change it. An app whose rate was never set shows 100% and says it's the default. A change doesn't reach running apps. Each device picks it up at its next launch, and the server can keep handing out the previous rate for up to 5 minutes after you save."
+        },
+        {
+          "h": "Set the rate at build time",
+          "a": "set-the-rate-at-build-time",
+          "b": "The build-time percentage is what a build uses before it has heard from the server, such as on the first launch after install or with no network. Set it with --dart-define: flutter build apk --dart-define=PICTO_SAMPLING_PERCENTAGE=25 It's compiled in, so it can't be changed on a device. A value above 100 records every run, and a value below 0 records none. To compute the value in Dart instead, such as from a debug menu or a remote config you already ship, pass samplingPercentage to Picto.setup. It defaults to the --dart-define value: Picto.setup( apiKey: const String.fromEnvironment('PICTO_API_KEY'), appVersion: '1.0.0', samplingPercentage: 10, );"
+        },
+        {
+          "h": "Which rate a run uses",
+          "a": "which-rate-a-run-uses",
+          "b": "Picto.setup asks the server for the app's rate and doesn't wait for the answer, so sampling adds nothing to launch time. The answer is stored on the device for the next launch. When your app first calls startRecording(), Picto decides using the first of these it has: 1. the rate the server returned during this run; 2. the rate stored by the previous launch; 3. the build-time percentage. A rate from the server replaces the build-time percentage; it isn't a ceiling or a floor. An app whose owner never set a rate gets 100 from the server, the same as the build default. If the request fails for any reason (offline, a timeout, an error status, or a response that isn't a valid percentage), Picto ignores it and uses the stored or build-time rate. It doesn't retry during the run. No failure stops recording or delays launch."
+        },
+        {
+          "h": "The decision is per run",
+          "a": "the-decision-is-per-run",
+          "b": "The decision is made once per run and never changes during it. Every startRecording() in a run gets the same answer. At 25%, Picto records about a quarter of launches, and all the sessions each of those launches starts. Picto also checks the decision when the app returns from the background, and restartRecording() returns null on a run that isn't recorded."
+        },
+        {
+          "h": "Check whether a run is recorded",
+          "a": "check-whether-a-run-is-recorded",
+          "b": "On a run that isn't recorded, startRecording() returns without starting a session, and Picto.isRecording stays false. The console says so once per run: [Picto] startRecording() did nothing: this run was not sampled. The sampling rate in effect is 25% — set per app by its owner, falling back to this build's --dart-define=PICTO_SAMPLING_PERCENTAGE (default 100). Nothing is wrong; a different run of this build will record. An uncaught error is still uploaded, with the moments before it, even on a run that was not sampled."
+        },
+        {
+          "h": "Errors are recorded on every run",
+          "a": "errors-are-recorded-on-every-run",
+          "b": "Sampling doesn't apply to uncaught errors. An error on a run that isn't recorded still starts a session, with the usual lookback before the error. A rate of 0 therefore records only the moments around errors, not nothing. See Errors."
+        },
+        {
+          "h": "Choose a rate",
+          "a": "choose-a-rate",
+          "b": "Keep 100 while you integrate, on internal and test builds, and on any app you're comfortable recording in full. Lower it on a high-traffic production app when a sample of ordinary use is enough. Plans count sessions, so a rate of 25 uses roughly a quarter of the sessions. See Plans & Retention. Use 0 to stop ordinary recording in a build without removing Picto. Errors are still recorded. The rate applies to runs, not users. At 10%, a user who opens your app twice a day is recorded about once every five days, so a bug that needs a rare sequence of steps is less likely to be caught."
+        }
+      ]
+    },
+    {
+      "u": "/recording/what-gets-recorded",
+      "t": "What Gets Recorded",
+      "d": "What a recording holds, and how to mask or exclude it.",
+      "g": "Recording",
+      "s": [
+        {
+          "b": "A Picto recording is your app's drawing commands, not a video, so you decide per widget what reaches it: on-screen text is captured by default, images are placeholders by default, and a few widgets change either."
+        },
+        {
+          "h": "What a recording holds",
+          "a": "what-a-recording-holds",
+          "b": "While a session records, Picto captures: What Flutter draws: shapes, clips, layout and positions, with each paragraph of text as an image of its pixels. Input and device state: pointer events (taps, drags), focus changes (named by the widget type, such as TextField, never by its contents), app lifecycle changes, screen size and pixel ratio, brightness, text scale and accessibility settings. Errors: each uncaught error's type, message and stack trace. See Errors. Frame timing: slow and frozen frames. See Slow and frozen frames. What you attach: tags, custom events, screen names and a user id. See Adding context. Each upload also carries the platform, your appVersion, and an install id: 32 hex digits from the platform's secure random source, made the first time an install uploads. It names one install of the app, not a person or a device. A reinstall or clearing the app's data makes a new one. The server uses it to rate-limit uploads per device."
+        },
+        {
+          "h": "What never leaves the device",
+          "a": "what-never-leaves-the-device",
+          "b": "Keystrokes. Key events aren't recorded. Typed text reaches a recording only as the painted text of a field, under the text rules below. Password fields' text. See Password fields. Anything under ExcludeFromRecording, including its size and position. Image pixels, unless you opt a subtree in with CaptureRealImages. Network request headers and bodies, always. See Network requests. The in-memory pre-roll. After Picto.setup, Picto keeps the last few seconds of the screen in memory whenever no session is recording. It uploads only if an uncaught error turns it into a session. See Errors."
+        },
+        {
+          "h": "Where recordings are processed",
+          "a": "where-recordings-are-processed",
+          "b": "Picto's servers store each upload. A replay in the dashboard is decoded and drawn in your browser. A video, still frames or a timeline that you or an agent request through picto:sessions or picto:mcp is rendered on Picto's servers. The render worker deletes its copy of the recording and the render at most 24 hours after the render finishes. See Sessions CLI. How long uploads are kept is on Plans & Retention."
+        },
+        {
+          "h": "On-screen text",
+          "a": "on-screen-text",
+          "b": "Text is captured by default: each paragraph is stored as an image of its rendered pixels, with its font and styling. Picto doesn't extract the strings, so a replay's text can't be searched or copied. To mask text, wrap a subtree in CaptureText(enabled: false). Every paragraph below it, including icon-font glyphs, records as line-box placeholders: Column( children: [ const Text('Order status'), // captured CaptureText(enabled: false, child: CustomerDetails()), // placeholders ], ) The innermost CaptureText decides. To mask everything and capture chosen screens, wrap the app in CaptureText(enabled: false) and the screens you want in CaptureText(enabled: true): CaptureText( enabled: false, child: MaterialApp( home: Column( children: [ AccountDetails(), // masked CaptureText(enabled: true, child: OrderSummary()), // captured ], ), ), ) A CaptureText(enabled: false) inside a captured subtree masks again. Nothing re-enables ExcludeFromRecording or a password field. A policy change applies from the next frame and doesn't erase frames already recorded. Text fields other than password fields are captured like any other text. Mask or exclude any field that holds something private, such as a "
+        },
+        {
+          "h": "Shadows and overhang",
+          "a": "shadows-and-overhang",
+          "b": "Each paragraph is captured with a margin around its lines for paint that reaches past them. By default the margin is a quarter of the paragraph's tallest line, which covers italic overhang and stacked accents but not a large shadow. To capture a shadow, set overflowPadding, in logical pixels: CaptureText( overflowPadding: 12, child: Text( 'Sale', style: TextStyle(shadows: [Shadow(blurRadius: 10)]), ), )"
+        },
+        {
+          "h": "Text limits",
+          "a": "text-limits",
+          "b": "A paragraph records as line-box placeholders instead of pixels when: its image would exceed 2048 physical pixels on either edge; capturing it would hold more than 8 MiB of raw pixels at once; the session has already stored 2 MiB of text images; or the session has already made 4096 text captures. A paragraph that hasn't changed reuses its earlier capture."
+        },
+        {
+          "h": "Password fields",
+          "a": "password-fields",
+          "b": "Picto masks a password field without a wrapper. A text field counts as one when it has obscureText: true, uses TextInputType.visiblePassword, or has the AutofillHints.password or AutofillHints.newPassword hint, whether or not it has focus. The field's text records as one block the size of its text area, so a replay shows neither the characters nor how many there are. Its caret and selection aren't recorded. A field that has obscured its text once stays a password field for as long as it exists, so a \"show password\" toggle doesn't expose the value. A field that starts revealed and has neither the keyboard type nor an autofill hint isn't a password field until it first obscures its text. Give it one of those, or wrap it in CaptureText(enabled: false)."
+        },
+        {
+          "h": "Leave a widget out",
+          "a": "leave-a-widget-out",
+          "b": "Wrap anything that must never be recorded, such as a payment form or a chat transcript, in ExcludeFromRecording: ExcludeFromRecording(child: PaymentCardForm()) Nothing from the subtree reaches the recording, not even its size or position, and nothing inside it can turn capture back on. The app draws it as usual."
+        },
+        {
+          "h": "Images",
+          "a": "images",
+          "b": "An image records as a reference or a placeholder, never as pixels, unless you opt in: How the app loads it What the recording stores What a replay shows A bundled asset (Image.asset, AssetImage) The asset's name The image, once you've uploaded it. See Uploading assets. NetworkImage, or another provider keyed by an http or https URL The full URL, query string included The image, fetched again through Picto's servers when the replay loads Anything else: MemoryImage, FileImage, an image decoded by hand or by a game engine's own cache Nothing but its size A placeholder Don't load a NetworkImage from a URL whose query string holds a token or personal data, because the URL is stored as written. A placeholder smaller than 80 × 80 and under 12,000 square logical pixels draws as a gray box. A larger one draws nothing, so whatever is behind it shows through. To record an image's pixels, wrap it in CaptureRealImages: CaptureRealImages(child: Image.memory(avatarBytes)) Each distinct image is stored once per session, however often it's drawn, up to 8 MiB of images per session. Past that, images in the subtree record as placeholders. CaptureRealImages covers what its subtree draws in the same pa"
+        },
+        {
+          "h": "Vector graphics and textures",
+          "a": "vector-graphics-and-textures",
+          "b": "SVGs, Lottie animations and Texture-backed widgets (video_player, camera, a Rive scene rendered with Factory.rive) don't replay as drawn by default. Wrap one in CaptureVectorGraphics to record it as a small image of its layer: CaptureVectorGraphics(child: SvgPicture.asset('assets/logo.svg')) Wrap the graphic tightly, because the whole wrapper is captured. Each capture is scaled to at most 256 pixels on its longest edge. An animation records as up to 24 keyframes per wrapper. Captures share 1.25 MiB per session, with at most 64 KiB per wrapper. A layer image would include every pixel under it, so CaptureVectorGraphics records nothing when its subtree contains ExcludeFromRecording, a CaptureText(enabled: false) or a password field, or when it sits under a text mask. Under an app-wide mask, wrap it in CaptureText(enabled: true) as well."
+        },
+        {
+          "h": "Native views",
+          "a": "native-views",
+          "b": "A native view is a widget whose pixels come from the platform, such as a map, a WebView or a native ad, built on UiKitView, AndroidView or HtmlElementView. Picto records its position and size, and a replay shows a gray box labelled Native view (not captured). Flutter widgets drawn over it record as usual. If the view can photograph itself, wrap it in CapturePlatformView and pass a function that returns its current pixels as an encoded image, or null when it has nothing to show yet. With mapbox_maps_flutter: MapboxMap? mapboxMap; Widget build(BuildContext context) { return CapturePlatformView( snapshot: () async => mapboxMap?.snapshot(), child: MapWidget(onMapCreated: (map) => mapboxMap = map), ); } How the snapshots behave: Picto asks for a snapshot when the wrapper first paints, then about once a second, because a native view changes without Flutter painting. A fast pan replays in steps about a second apart. Each snapshot is scaled to at most 512 pixels on its longest edge and stored as PNG. A snapshot identical to the last one isn't stored again. Snapshots share 1 MiB per session, separate from images and vector graphics. Once it's spent, the replay keeps showing the last snapsho"
+        },
+        {
+          "h": "Network requests",
+          "a": "network-requests",
+          "b": "Network requests aren't recorded unless you send them through PictoHttpClient. It wraps an http.Client from package:http, which your app adds as its own dependency: import 'package:http/http.dart' as http; import 'package:picto/picto.dart'; final client = PictoHttpClient(http.Client()); Use client like the client it wraps. For each request, the recording gets the method, the URL, the status code and the time until the response headers arrived. A request that fails before a response, such as a timeout or a DNS failure, records with no status code. Requests show on the replay's Events lane as networkRequest events. Headers and request and response bodies are never recorded. The recorded URL always drops credentials (https://user:password@host), and by default it also drops the query string and fragment, because those often carry tokens or personal data. The request itself is unchanged. To keep the query string and fragment in the recording: final client = PictoHttpClient(http.Client(), redactQueryParameters: false);"
+        },
+        {
+          "h": "Slow and frozen frames",
+          "a": "slow-and-frozen-frames",
+          "b": "Picto times every frame from Picto.setup on, with nothing to add. A frame's time is its build time plus its raster time: Kind Threshold Where it shows Slow 16.7 ms or more (one frame at 60 fps) Counted per recording, and drawn as bursts on the replay's Slow frames lane Frozen 700 ms or more All of the above, plus a row of its own that the dashboard lists and alerts can count A frozen frame also counts as a slow one, so a session showing 312 slow · 3 frozen had 312 slow frames, 3 of them frozen. Frames Flutter doesn't render, such as a native map owning the screen, aren't measured. The thresholds can't be changed."
+        },
+        {
+          "h": "Data you attach",
+          "a": "data-you-attach",
+          "b": "Tags, custom event data, route and screen names, the user id you pass to Picto.identify, and the messages of your own exceptions are recorded exactly as written. Picto doesn't scan, mask or redact them, and ExcludeFromRecording doesn't apply to them. Keep personal data out of them. See Adding context."
+        }
+      ]
+    },
+    {
+      "u": "/recording/adding-context",
+      "t": "Adding Context",
+      "d": "Tags, events, screens and user ids.",
+      "g": "Recording",
+      "s": [
+        {
+          "b": "Add context to a recording with four calls: Picto.setTag describes the whole session, Picto.recordEvent marks a moment, Picto.navigatorObserver and Picto.recordScreen name the screen the user is on, and Picto.identify says who the user is. Everything you pass is recorded exactly as written, with no scanning or masking. Use identifiers and categories, never user-entered text, email addresses or tokens."
+        },
+        {
+          "h": "Prerequisites",
+          "a": "prerequisites",
+          "b": "Picto.setup runs in main(). See Quick start."
+        },
+        {
+          "h": "Tag the session",
+          "a": "tag-the-session",
+          "b": "A tag is a key and a value that describe the whole session, such as an experiment variant or a build channel: Picto.setTag('experiment', 'checkout-redesign-v2'); Picto.setTag('channel', 'beta'); A later call with the same key replaces the value. Tags are uploaded with the recording, and the dashboard shows them on the session. Tags belong to the recording that's running when you set them, so set them after Picto.startRecording(). They don't carry over: a new session starts with none, and so does the next segment of a session the app resumes after being backgrounded. Set a run-wide tag again after each start. Picto adds no tags of its own. To label a whole run instead, pass label in the metadata when you end the session, and the dashboard shows it as a badge on the recording: await Picto.endSessionAndUpload(metadata: {'label': 'checkout-regression'});"
+        },
+        {
+          "h": "Record a custom event",
+          "a": "record-a-custom-event",
+          "b": "A custom event is a named, timestamped marker, with optional string data: Picto.recordEvent('checkoutTapped', data: {'sku': 'abc123', 'step': '3'}); Picto.recordEvent('paymentFailed'); Events show on the replay's Events lane at the moment you recorded them. Record them while a session is running: an event recorded between sessions reaches a recording only if an uncaught error then starts one. See Errors."
+        },
+        {
+          "h": "Record screens",
+          "a": "record-screens",
+          "b": "Add Picto.navigatorObserver to your app's navigator, and every route change records the screen the user moved to: MaterialApp( navigatorObservers: [Picto.navigatorObserver], home: const HomePage(), ) With a router package, pass it wherever that package takes navigator observers. It has to reach the Navigator your app pushes routes onto. Reading Picto.navigatorObserver returns a new observer each time, so it's safe to add to more than one navigator. Without it, no screens are recorded and the rest of the recording is unchanged. Screens show on the replay's Screen lane. When a session starts, the screen the user is already on is recorded first."
+        },
+        {
+          "h": "Name your routes",
+          "a": "name-your-routes",
+          "b": "A screen is recorded under its route's RouteSettings.name: The route Recorded as Has a non-empty name That name Is the navigator's first route and has no name / Has no name unnamed( ), such as unnamed(MaterialPageRoute ) Navigator.pushNamed, a routes: table and most router packages set the name for you. For a route you build yourself, pass settings: Navigator.push( context, MaterialPageRoute ( settings: const RouteSettings(name: '/checkout'), builder: (_) => const CheckoutPage(), ), ); Use the route pattern, not the resolved path: /orders/detail, not /orders/8814. An id or email in a route name is recorded as written."
+        },
+        {
+          "h": "Screens that aren't routes",
+          "a": "screens-that-arent-routes",
+          "b": "A Navigator never hears about a tab in an IndexedStack, a page of a PageView or a screen swapped in with setState. Record those with Picto.recordScreen: void _selectTab(int index) { setState(() => _tab = index); Picto.recordScreen(const ['home', 'discover', 'profile'][index]); } The name is remembered against the route on top, so pushing a page from the discover tab and popping it back records discover again, not the route's own name. Recording the screen that's already recorded does nothing."
+        },
+        {
+          "h": "Dialogs and bottom sheets",
+          "a": "dialogs-and-bottom-sheets",
+          "b": "An unnamed dialog, bottom sheet, dropdown or popup menu isn't a screen, and opening or closing one records nothing. Name one through routeSettings to record it: showModalBottomSheet ( context: context, routeSettings: const RouteSettings(name: 'bills'), builder: (_) => const BillsSheet(), ); The Screen lane then reads / → bills → /. Name the sheets and dialogs that are places in your app's flow, and leave confirmations and pickers unnamed."
+        },
+        {
+          "h": "Identify the user",
+          "a": "identify-the-user",
+          "b": "Picto.identify attaches your own id for the person using the app: Picto.identify('user_9f8a2c'); Call it as soon as you know who the user is, usually right after sign-in. A session that records before the call has no user id. A later call replaces the id. The id carries over to every later session in the same app run. It's sent with the recording and with the session's exceptions, frozen frames and frustrated taps, and the dashboard's session lists can filter by it. Picto doesn't check it against anything. Anyone with access to the organization's dashboard sees the id. An internal account id is a safer choice than an email address."
+        },
+        {
+          "h": "Check that it worked",
+          "a": "check-that-it-worked",
+          "b": "Open the session's replay in the dashboard. Tags and the user id show on the session card, screens on the Screen lane, and events on the Events lane. See Finding and watching sessions."
+        }
+      ]
+    },
+    {
+      "u": "/recording/testing",
+      "t": "Testing",
+      "d": "Test an app that records.",
+      "g": "Recording",
+      "s": [
+        {
+          "b": "Test an app that uses Picto the way you test any Flutter app: call your real main() from a widget test, and Picto stands down, records nothing and never touches the network. There's no test package to add and nothing to mock."
+        },
+        {
+          "h": "Call your real main() from a test",
+          "a": "call-your-real-main-from-a-test",
+          "b": "flutter_test installs its own binding before a test runs, and a process can have only one. When Picto.setup finds that binding, it leaves it in place instead of failing, so your main() runs unchanged: import 'package:flutter_test/flutter_test.dart'; import 'package:my_app/main.dart' as app; void main() { testWidgets('the app boots', (tester) async { app.main(); await tester.pumpAndSettle(); expect(find.byType(HomePage), findsOneWidget); }); } You don't need a separate test entry point or a flag around Picto.setup. In a debug build of the real app, Picto throws an error after the first frame when its binding isn't installed (see Troubleshooting). It never does under a test binding."
+        },
+        {
+          "h": "What runs and what doesn't",
+          "a": "what-runs-and-what-doesnt",
+          "b": "Under a test binding, Picto's session state works but nothing is captured: Sessions start and stop. Picto.startRecording() sets Picto.isRecording to true, so code that depends on it runs. No drawing is captured. Picto.isRecordingBindingInstalled is false, and startRecording() prints a [Picto] line saying the session will be discarded. The line says it's expected in a widget test. Nothing runs in the background. There's no in-memory pre-roll, no sampling request, and no 30-second timer after an uncaught error, so a test that throws doesn't fail with A Timer is still pending. The privacy widgets render their child unchanged. CaptureText, ExcludeFromRecording, CaptureRealImages, CaptureVectorGraphics and CapturePlatformView never change what a test finds. Assert on both states to show the difference: testWidgets('recording starts but captures nothing', (tester) async { app.main(); await tester.pumpAndSettle(); Picto.startRecording(); expect(Picto.isRecording, isTrue); expect(Picto.isRecordingBindingInstalled, isFalse); });"
+        },
+        {
+          "h": "Nothing is uploaded from a test",
+          "a": "nothing-is-uploaded-from-a-test",
+          "b": "Ending a session in a test sends no request, writes no file and queues nothing. Picto.endSessionAndUpload() returns false, and Picto.endSessionAndUploadOutcome() returns PictoSessionEndOutcome.recordingPipelineAbsent, which tells this apart from a failed upload: testWidgets('the report-a-bug button ends the session', (tester) async { app.main(); await tester.pumpAndSettle(); Picto.startRecording(); final outcome = await tester.runAsync(Picto.endSessionAndUploadOutcome); expect(outcome, PictoSessionEndOutcome.recordingPipelineAbsent); expect(Picto.isRecording, isFalse); }); The session still ends, so state is clean for the next step. Picto.retryPendingUploads() does nothing, and neither do the automatic retries at launch and on returning to the foreground. Uploads left on your machine by a real run of the app are not sent, changed or deleted. This doesn't depend on detecting a test runner: Picto only uploads when its binding captured the session, in every build mode. Tests can't add sessions to your dashboard."
+        },
+        {
+          "h": "Integration tests",
+          "a": "integration-tests",
+          "b": "integration_test installs its own test binding too, so Picto stands down the same way on a real device: nothing is captured or uploaded, even though the device has a network. To see a real recording, run the app itself, not the test."
+        }
+      ]
+    },
+    {
+      "u": "/assets/uploading-assets",
+      "t": "Uploading Assets",
+      "d": "Make your app's bundled images show in replays.",
+      "g": "Recording",
+      "s": [
+        {
+          "b": "Run dart run picto:upload_assets from your Flutter project to upload the images your app bundles, so replays and renders draw them instead of placeholders. picto:setup and picto:init save each build flavor's API key to a picto.yaml file. A recording stores a bundled image's name, not its pixels. The dashboard can't see your app's bundle, so an image that was never uploaded draws as a placeholder. See Images. All three commands ship in the picto package."
+        },
+        {
+          "h": "Prerequisites",
+          "a": "prerequisites",
+          "b": "A Picto account that owns an organization. See Account & Team. A Flutter project that depends on picto, with flutter pub get already run."
+        },
+        {
+          "h": "Save your API keys",
+          "a": "save-your-api-keys",
+          "b": "picto:setup signs in, lets you pick one of your organizations and a client app (or create one), and saves that app's API key under a flavor name you choose: dart run picto:setup Run it again to add another flavor. It asks before replacing a flavor that's already saved, and when the file holds more than one flavor it asks whether the new one is the default. Flavor names start with a letter and contain only letters, numbers, _ and -. If your project already declares build flavors, picto:init creates a client app for each one in a single pass: dart run picto:init It finds flavors in two places: Platform File What counts as a flavor Android android/app/build.gradle.kts, or android/app/build.gradle Each entry in the productFlavors { } block, in Groovy (dev { }) or Kotlin (create(\"dev\") { }) iOS ios/Runner.xcodeproj/project.pbxproj The part after the dash in a Debug- , Release- or Profile- build configuration picto:init makes one client app per flavor found on either platform, named - , such as myapp-prod, and reuses an app with that name if the organization already has one. It warns when Android and iOS list different flavors, asks before replacing a saved flavor, and asks which flavor "
+        },
+        {
+          "h": "Upload assets",
+          "a": "upload-assets",
+          "b": "From the root of your Flutter project, run: dart run picto:upload_assets It asks for your email and password, lists the client apps in the organizations you own, and uploads to the ones you pick (1,3 or all). It signs in as your account, never with an API key: an API key ships inside your app, and anyone who extracts it could otherwise replace your images. Each uploaded file prints a line, and the run ends with a count: Done: 12 uploaded, 30 already present, 1 too large, 0 failed. The command exits with 1 when any asset failed or it couldn't run, and 0 otherwise. A file skipped for its size isn't a failure. Flag Meaning --email, --password Your account. Leave either out to be prompted, which keeps the password out of your shell history. --token An upload token instead of signing in. Also read from the PICTO_TOKEN environment variable; the flag wins. Needs --client-app-id. See Upload from CI. --client-app-id A client app to upload to. Repeat it for several. Required with a token, and the only way to reach a client app in an organization you collaborate on but don't own. --app-version The app version these assets ship in. Defaults to version in your pubspec.yaml. A +build suffix is d"
+        },
+        {
+          "h": "What gets uploaded",
+          "a": "what-gets-uploaded",
+          "b": "The command reads flutter.assets in your pubspec.yaml and nothing else, so flutter.fonts isn't uploaded. In flutter.assets What goes up A file (assets/logo.png) The file and its density variants beside it (assets/2.0x/logo.png). The base file can be missing if a variant exists. A directory (assets/images/) The files directly in it and in its density folders (2.0x/, 3.0x/). Declare other subfolders too. An entry with transformers: The source file, not the transformed output. A replay shows the untransformed image. packages/ / The file at lib/ in the dependency . Each file is uploaded under the name a recording uses for it, which is the asset key Flutter loads it by: In an app, your own assets keep the path you declared: assets/logo.png, assets/2.0x/logo.png. Assets declared by your dependencies (not dev_dependencies), including theirs in turn, go up as packages/ / , which is what Image.asset(..., package: ' ') loads. In a package, only its own assets go up, as packages/ / . A project counts as a package when its pubspec sets flutter.plugin, or when it has none of lib/main.dart, web/index.html or a platform folder (android/app, ios/Runner, macos/Runner, windows/runner, linux/runner)."
+        },
+        {
+          "h": "Versions",
+          "a": "versions",
+          "b": "Each client app keeps one copy of an asset per app version, so changing an image doesn't change what older sessions show. A replay picks: 1. The copy from the version the session was recorded on. 2. Otherwise, the newest copy from an earlier version. 3. Otherwise, the earliest copy. Versions compare by number, so 1.10.0 comes after 1.9.0, and build numbers are ignored: a session from 1.2.0+7 looks up 1.2.0. A session with no version shows the newest copy. A release that didn't change an image stores nothing new: the command compares the file with the copy that version would already show, and counts a match as already present. With no --app-version and no version in pubspec.yaml, the command says so and uploads unversioned. An unversioned copy sorts before every version."
+        },
+        {
+          "h": "Upload again",
+          "a": "upload-again",
+          "b": "Running the command again is safe. Files whose contents match what the version already has count as already present. --on-duplicate decides what happens when the version already has the asset with different contents, such as an image you fixed without bumping the version: Value Result ignore (default) Keeps the uploaded copy, warns, and counts it as already present. override Replaces that version's copy. Other versions are untouched. fail Counts the asset as failed whenever the version already has it, even with the same contents, so the run exits 1. Only the account that uploaded a copy can replace it. Replacing a collaborator's copy with override counts as failed. To replace this version's copies with the files on disk, run: dart run picto:upload_assets --on-duplicate override"
+        },
+        {
+          "h": "Upload from CI",
+          "a": "upload-from-ci",
+          "b": "In CI there's nobody to sign in, so pass an upload token and the client apps: PICTO_TOKEN= dart run picto:upload_assets \\ --client-app-id \\ --client-app-id Create the token in the dashboard: 1. Open Account in the sidebar. 2. Under Upload tokens, name the token after where it runs, such as GitHub Actions. 3. Select Create token. 4. Copy the token into your CI provider's secrets. It's shown only once. A token acts as your account and can only upload assets to client apps you own or collaborate on. An account can hold 20 live tokens. Tokens don't expire: select Revoke beside one to stop it at once. Deleting your account revokes all of them. Run the step after dependencies are installed, and let it fail the build: a non-zero exit means some assets didn't reach the server."
+        },
+        {
+          "h": "When an image still draws as a placeholder",
+          "a": "when-an-image-still-draws-as-a-placeholder",
+          "b": "The browser console shows Replay: no image for \" \", drawing a placeholder. for each image a replay couldn't load, and a render lists them in its warnings. Cause Fix It was never uploaded to this client app, or went to another flavor's Run the command for that client app. It's over 5 MB Make it smaller and upload it again. It's a network image whose URL no longer loads Nothing to upload: replays fetch it from its URL. It has no asset name or URL: MemoryImage, FileImage, or an image a game engine decoded itself Uploading can't help. Wrap it in CaptureRealImages. See Images. An image with no name or URL logs nothing, so a blank area with no console line can still be a missing image."
+        }
+      ]
+    },
+    {
+      "u": "/dashboard/finding-and-watching-sessions",
+      "t": "Finding & Watching Sessions",
+      "d": "The session lists, filters and replay viewer.",
+      "g": "Dashboard",
+      "s": [
+        {
+          "b": "Pick an organization and a client app in the dashboard, find the session in one of its lists, and open its replay. You need a dashboard account with access to the organization (see Account & Team), and the app must have uploaded at least one session (see Quick Start)."
+        },
+        {
+          "h": "Check the last 24 hours on Overview",
+          "a": "check-the-last-24-hours-on-overview",
+          "b": "Overview is where a client app opens. It shows four counts for the last 24 hours, each with the change from the 24 hours before: Sessions, Exceptions, Frozen frames and Frustration. Click a count to open that list filtered to the last 24 hours. Below the counts, Most recent problems lists up to eight of the newest exceptions, frozen frames and frustration taps, and Most recent sessions lists the six newest sessions. Click a problem to open its replay at the moment it happened, or a session to open its replay from the start."
+        },
+        {
+          "h": "Pick a list",
+          "a": "pick-a-list",
+          "b": "The sidebar's Monitor group has one list per kind of thing you might be looking for: List One row is Grouping Sessions One session, newest first None Exceptions An uncaught error Group by type (on by default) folds rows with the same type and message into one, with a count. Show every occurrence turns it off. Frozen frames A frame that took longer than 700 ms to build and raster Group by session (on by default) shows one row per session with its worst frame. Show every frame turns it off. Frustration A cluster of rage taps, dead taps, error taps or repeat taps Group by session (on by default). Show every cluster turns it off. In a grouped list, the row's toggle shows or hides the rows inside the group, and its play button opens the newest occurrence (or, for frozen frames, the worst frame) in the replay. Every ungrouped signal row has Open at this moment in the replay. The footer counts what's loaded; click Load more for the next page."
+        },
+        {
+          "h": "Filter a list",
+          "a": "filter-a-list",
+          "b": "Every list has a date range above it: 24h, 7d, 30d or All time (the default). Clicking one applies it straight away. Click Filters for the rest. Fields apply when you click Apply filters, and the Filters button shows how many are set. Clear filters resets everything. Filter Lists Matches From, To All A custom date range. To includes the whole day. Sessions are filtered by when the device started recording, so a session uploaded days later is found on the day it was recorded. Platform All android, ios, macos or web, in any letter case App version All The exact version string, such as 1.0.0 User ID All The exact ID your app passed to Picto.identify (see Adding Context) Label or tag Sessions Text in the session's metadata, such as a tag or its label Type or message Exceptions Text in the exception's type or message Kind Frustration Rage tap, Dead tap, Error tap or Repeat tap Only sessions with an error Sessions Sessions with an uncaught error in any of their segments If nothing matches, the list says Try a wider search, with its own Clear filters button."
+        },
+        {
+          "h": "Read a session row",
+          "a": "read-a-session-row",
+          "b": "Each row in Sessions has these columns: When: how long ago the session started. Hover for the exact time. User: the ID set with Picto.identify, or —. Platform: the platform and app version. Length and Size: the session's duration and upload size. Signals: badges for its exceptions (or error), a frozen frame, and its label. Two buttons sit at the end of the row: Copy replay link and Watch replay. Clicking anywhere else on the row also opens the replay."
+        },
+        {
+          "h": "Watch the replay",
+          "a": "watch-the-replay",
+          "b": "The replay opens in the dashboard at its own address, /dashboard/ / / / , so you can refresh it, bookmark it, or leave with the browser's Back button. The Sessions button above the replay goes back to the list, and so does Esc. The transport under the replayed screen has these controls: Play and Pause, Previous event and Next event, Previous frame and Next frame. Playback speed: 0.25×, 0.5×, 1×, 2× or 4×. Skip idle: jumps over stretches where nothing happens. Any quiet gap longer than 5 seconds is cut down to its first 5 seconds, and the button says how much time it saves. It's off by default and only shows when the session has idle time. Loop: plays the recording again from the start when it ends. Zoom: 50% to 400%, with the - and + keys."
+        },
+        {
+          "h": "Read the timeline",
+          "a": "read-the-timeline",
+          "b": "The timeline under the screen stacks six lanes over one time axis, so you can read one moment across all of them. Click anywhere on it to seek there. Lane What it draws Exceptions A mark per uncaught error Slow frames A bar per burst of slow frames. A frozen frame is drawn taller. Frustration Rage, dead and error tap clusters, with the kind and tap count Screen The route the user was on. It's empty if the app doesn't use PictoNavigatorObserver. Events Your own custom events Activity How much the user was touching the screen. Idle stretches are hatched. Screen is where the user was; Events is what your code marked as happening. See Adding Context for both."
+        },
+        {
+          "h": "Use the event list",
+          "a": "use-the-event-list",
+          "b": "The Events tab lists every recorded event in time order. Click a row to seek the replay to it. Type in the search box to filter rows by text. The chips above the list turn categories on and off: Errors, Tags, Screen, Device (lifecycle, metrics, brightness, focus), Taps and Skipped (parts the recorder couldn't draw). Taps and Skipped are off by default. A chip is greyed out when the session has none of that category. The Issues tab lists only the session's exceptions, slow or frozen frames and frustration clusters. Right-click a row, or long-press it on a touch screen, for Jump here and Copy link at this moment."
+        },
+        {
+          "h": "See the rest of the session",
+          "a": "see-the-rest-of-the-session",
+          "b": "The panel beside the replay shows who the session was: the user ID (or Not identified), when it started, its length, build, viewport, appearance and accessibility settings. A session that was uploaded in more than one segment has a Segments card listing them, for example \"one session, 3 uploads\". Click a segment to load it. The timeline covers the whole session, so dragging across it also moves between segments. See How Sessions Work for when a session is split. When the session has a user ID and that user has other sessions in the same client app, Also from &lt;user ID&gt; lists them. Click one to open it."
+        },
+        {
+          "h": "Use the keyboard",
+          "a": "use-the-keyboard",
+          "b": "Press ? in the replay to see this list. The single-letter shortcuts can be turned off from the same sheet, under Single-key shortcuts. Keys Action Space, K Play or pause ←, → Back or forward 5 seconds Shift+←, Shift+→ Back or forward 1 second , . Previous or next recorded frame P, N Previous or next event E Next error (Shift+E for the previous one) 0 to 9 Jump to 0% to 90% of the session Home, End Jump to the start or the end S Cycle playback speed L Loop the recording I Skip the idle stretches -, + Zoom the frame out or in / Filter events ? Show the shortcuts Esc Close the replay"
+        },
+        {
+          "h": "Share a replay",
+          "a": "share-a-replay",
+          "b": "A replay link has the form https://picto.dev/r/ . It opens the replay for anyone signed in with access to the organization. Anyone else sees \"That replay link is invalid, or you don't have access to it.\" There are three ways to copy one: Copy replay link on a session row copies a link to the start of the session. The copy button at the top of the replay copies a link to the moment on screen. Its label says which moment, such as Copy link at 3:12. The link ends in ?t= . Copy link at this moment on an event list row copies a link to that event."
+        },
+        {
+          "h": "Why a replay can be missing",
+          "a": "why-a-replay-can-be-missing",
+          "b": "Replays are deleted 30 days after upload. The exceptions, frozen frames and frustration taps from the same session stay in their lists. Opening one of those after its replay is gone reports that the recording is missing. See Plans & Retention. A replay draws bundled images only when you've uploaded your app's assets for that client app. See Uploading Assets. What a replay can and can't show is covered in What Gets Recorded."
+        }
+      ]
+    },
+    {
+      "u": "/dashboard/alerts",
+      "t": "Alerts",
+      "d": "Get a webhook when exceptions, frozen frames or frustration taps spike.",
+      "g": "Dashboard",
+      "s": [
+        {
+          "b": "An alert rule counts one signal for a client app over a rolling window and posts to a webhook when the count reaches your threshold. Only the organization's owner can create a rule. Collaborators see the organization's rules but can't change them. Once a rule exists, only the person who created it can edit, test, turn off or delete it; everyone else sees \"Only a rule's owner can change or delete it.\""
+        },
+        {
+          "h": "Create a rule",
+          "a": "create-a-rule",
+          "b": "1. Open the client app and select Alerts in the sidebar. 2. Click New alert rule. 3. Fill in the form: Field What to enter Metric Exceptions, Frozen frames, or Frustration taps (rage/dead/error). Frozen frames is the default. Threshold (count) How many occurrences fire the alert. A whole number above 0. The default is 5. Rolling window 5 min (the default), 1 hour, 1 day, or Custom. Custom shows Custom window (seconds), a whole number above 0. Webhook URL (Slack-compatible) The address the alert is posted to. See Choose a webhook URL. 4. Click Create rule. The rule appears in the list, turned on. To check that the webhook works before anything fires, click Send test on its row."
+        },
+        {
+          "h": "Choose a webhook URL",
+          "a": "choose-a-webhook-url",
+          "b": "Any endpoint that accepts a JSON POST works. For Slack, paste an Incoming Webhook URL: the payload's text field is what Slack shows. Picto refuses a URL when you create the rule, and checks it again on every delivery. It's refused if: It isn't http:// or https://, or has no host. It carries a username or password. Its host is, or resolves to, an address that isn't public: the local machine, a private network range, link-local, or another reserved range. Its host is a bare number, or an internal name such as localhost, metadata, or one ending in .local, .internal, .localdomain or .home.arpa. A delivery waits up to 10 seconds and doesn't follow redirects. Any response other than 2xx counts as a failure."
+        },
+        {
+          "h": "Send a test",
+          "a": "send-a-test",
+          "b": "Click Send test on the rule's row. Picto posts one message to the webhook straight away and shows \"Test message sent to the webhook.\" or the reason it didn't arrive. You can send one test per rule every 10 seconds. A test message's text starts with 🧪 Test from Picto and ends with \"Nothing has fired.\", and the payload has \"test\": true. A test doesn't change the rule's Last fired time or delivery status."
+        },
+        {
+          "h": "How a rule fires",
+          "a": "how-a-rule-fires",
+          "b": "Picto checks every turned-on rule once a minute. It counts the rule's signal for the client app over the last window, by the time each signal reached the server. When the count is at least the threshold, the rule fires. After a rule fires, it doesn't fire again until a full window has passed. A 5-minute rule that keeps breaching fires at most once every 5 minutes. A failed delivery isn't retried; the rule waits the same window. The rule's row shows Last fired (or Never) with a delivered or failed badge. Hover over a failed badge to see the error, such as the HTTP status and response body."
+        },
+        {
+          "h": "Read an alert",
+          "a": "read-an-alert",
+          "b": "A fired alert is a POST with Content-Type: application/json. This body is what a Frozen frames rule with a threshold of 5 and a 5-minute window sends: { \"text\": \"🚨 jank_events: 7 in the last 300s (threshold: 5)\", \"metricType\": \"jank_events\", \"count\": 7, \"threshold\": 5, \"windowSeconds\": 300, \"clientAppId\": \" \", \"organizationId\": \" \", \"firedAt\": \"2026-11-13T09:41:00.000\" } Field Meaning text A ready-to-show summary metricType exceptions, jank_events (frozen frames) or tap_cluster_events (frustration taps) count How many were counted in the window. Counting stops once the threshold is met, so above 500 this can be lower than the true number. threshold The rule's threshold windowSeconds The rule's window, in seconds clientAppId, organizationId Which client app and organization the rule belongs to firedAt When the rule fired, as an ISO 8601 timestamp"
+        },
+        {
+          "h": "Change, pause or delete a rule",
+          "a": "change-pause-or-delete-a-rule",
+          "b": "Each action is a button on the rule's row: Edit opens the same form. Click Save changes. Disable turns the rule off, and Enable turns it back on. The Status column shows on or off. A rule that's off isn't checked. The trash button deletes the rule after you confirm. This can't be undone. Deleting the client app or the organization deletes its rules too."
+        }
+      ]
+    },
+    {
+      "u": "/dashboard/account-and-team",
+      "t": "Account & Team",
+      "d": "Accounts, organizations, apps, API keys and collaborators.",
+      "g": "Dashboard",
+      "s": [
+        {
+          "b": "Your dashboard account owns organizations, each organization holds client apps, and each client app has the API key your app records with. An organization groups client apps and the people who can see them. A client app is one app, or one build you want to record separately. Every session belongs to a client app."
+        },
+        {
+          "h": "Create an account",
+          "a": "create-an-account",
+          "b": "Go to picto.dev/sign-up, enter Your name and Work email, and click Send my sign-in link. Open the emailed link to finish. There's no password to choose. The account starts with no organization. The dashboard's Get started page walks you through naming your organization and first client app and choosing a plan (see Plans & Retention). Sign-up refuses two kinds of address: An address with a + in it: \"Email aliases (addresses with a \"+\" in them) are not accepted. Sign up with your main address instead.\" An address that reaches an inbox that already has an account: \"An account already exists for this inbox. Sign in with the address you first signed up with instead.\" For Gmail, dots in the name and googlemail.com reach the same inbox."
+        },
+        {
+          "h": "Join with an invite",
+          "a": "join-with-an-invite",
+          "b": "An invite link looks like https://picto.dev/join?t= . Open it, enter Your name and Work email, and open the sign-in link Picto emails you. Redeeming an invite creates your account with an organization named after you, a client app called My app, and a 14-day trial that starts when you redeem it. The link is refused when it: Was revoked: \"That invite link is not valid. It may have been revoked — ask whoever sent it for a new one.\" Was already used: \"That invite link has already been used to create an account. Sign in instead, or ask for a new invite.\" Is more than 14 days old: \"That invite link has expired. Ask whoever sent it for a new one.\""
+        },
+        {
+          "h": "Sign in",
+          "a": "sign-in",
+          "b": "Go to /sign-in, enter your Email, and click Email me a sign-in link. To use a password, click Sign in with a password instead. An account has no password until you add one: open Account in the sidebar, find Password under Sign-in, and click Add a password. If you forget it, click Forgot password? on the sign-in page and then Send reset link. A reset link works for ten minutes."
+        },
+        {
+          "h": "Manage organizations",
+          "a": "manage-organizations",
+          "b": "To create one, open the organization switcher in the top bar, choose New organization, enter the Organization name and click Create organization. You're its owner. To rename one, open Organization in the sidebar, edit Name and click Save. Only the owner can. To delete one, open Organization and click Delete organization under Danger zone, then confirm. This deletes every client app, recording and signal in it, and can't be undone. If the organization has a paid plan, Picto cancels it first so it isn't charged again. If that cancellation fails, nothing is deleted."
+        },
+        {
+          "h": "Manage client apps",
+          "a": "manage-client-apps",
+          "b": "To create one, open the app switcher in the top bar, choose New app, enter the App name and click Create app. Only the organization's owner sees New app. To rename one, open App settings, edit Name under App and click Save. To delete one, open App settings and click Delete app under Danger zone, then confirm. This deletes every recording, exception and signal that belongs to it, and can't be undone."
+        },
+        {
+          "h": "Copy or regenerate API keys",
+          "a": "copy-or-regenerate-api-keys",
+          "b": "Your app authenticates every upload with the client app's API key. Open App settings. The API key section shows the key masked: click Reveal key to see it, or Copy key to copy it without showing it. See Quick Start for where the key goes. To replace the key, click Regenerate key under Danger zone and confirm. Only the owner can. The old key stops working at once, and builds that still use it can't upload until you ship the new one."
+        },
+        {
+          "h": "Set the sampling rate and upload tokens",
+          "a": "set-the-sampling-rate-and-upload-tokens",
+          "b": "App settings also holds Sampling rate, the share of app runs Picto records. See Sampling. Account also holds Upload tokens, which picto:upload_assets uses. See Uploading Assets."
+        },
+        {
+          "h": "Invite collaborators",
+          "a": "invite-collaborators",
+          "b": "1. Open Organization in the sidebar. 2. Under Collaborators, enter their email in Invite a collaborator. 3. Click Send invite. Picto emails them an invite. They don't need an account yet: they get access when they sign up with that address. The address is matched without regard to letter case. Collaborators see the organization's client apps, sessions, signals and alert rules, can copy API keys, and can delete recordings. Only the owner can: Invite or remove collaborators. Create, rename or delete client apps, change the sampling rate, and regenerate API keys. Create alert rules (see Alerts). Rename, transfer or delete the organization, and manage its plan. To remove a collaborator, click Remove collaborator next to their email and confirm."
+        },
+        {
+          "h": "Transfer ownership",
+          "a": "transfer-ownership",
+          "b": "Under Ownership on the Organization page, click Make owner next to a collaborator, then Transfer ownership. The new owner controls billing, and the client apps and alert rules you own in the organization move to them. You stay on as a collaborator, and only the new owner can hand it back. If there's nobody to pick, the section says No eligible collaborators. Invite someone first."
+        },
+        {
+          "h": "Leave an organization",
+          "a": "leave-an-organization",
+          "b": "As a collaborator, open Organization and click Leave organization, then Leave. You lose access until you're invited again. An owner can't leave; transfer ownership first."
+        },
+        {
+          "h": "Delete your account",
+          "a": "delete-your-account",
+          "b": "1. Open Account and click Delete account under Danger zone. 2. Read the list of what will go. Every organization you own is deleted with everything in it, and you leave the ones you only collaborate on. 3. Type the confirmation phrase shown in Type \"…\" to confirm: the name of your first owned organization, or your email if you own none. 4. If your account has a password, enter it in Your current password and click Delete my account. If it doesn't, click Email me a confirmation link and open the link within one hour. Any paid plan is cancelled first. If that fails, nothing is deleted. Once confirmed, deletion is immediate and nothing can be restored."
+        }
+      ]
+    },
+    {
+      "u": "/dashboard/plans-and-retention",
+      "t": "Plans & Retention",
+      "d": "Session limits, billing and how long recordings are kept.",
+      "g": "Dashboard",
+      "s": [
+        {
+          "b": "Plans differ only in how many sessions an organization can record each billing period; every plan has the whole dashboard, and every recording is kept for 30 days."
+        },
+        {
+          "h": "Plans",
+          "a": "plans",
+          "b": "Each organization has its own plan. The organization's owner picks one from Get started or the Plan section of the Organization page. Plan Price Sessions included per period Overage buffer Starter $49 / month 2,500 1,000 Growth $149 / month 10,000 2,500 Scale $399 / month 40,000 10,000 Enterprise Custom Custom Custom The overage buffer is extra sessions on top of the included ones, so a busy week keeps recording. Agent access is on every plan, with hourly limits that rise with the plan (see Sessions CLI & MCP). Enterprise is arranged through picto.dev/enterprise."
+        },
+        {
+          "h": "What counts as a session",
+          "a": "what-counts-as-a-session",
+          "b": "A session is one run of your app that you record and upload, however long it lasts. Sessions are counted across every client app in the organization. A session is counted once, in the billing period its first segment was uploaded in. Later segments of the same session don't count again, even when they arrive in the next period. Watching replays costs nothing. See How Sessions Work for segments. The count is updated about once a minute, and within a period it never goes down. A session that ages out of retention after it was counted stays counted."
+        },
+        {
+          "h": "What happens at the limit",
+          "a": "what-happens-at-the-limit",
+          "b": "Uploads keep working until the period's count passes the included sessions plus the overage buffer. After that, Picto refuses new sessions until you upgrade or the next billing period starts. Segments of a session that was already counted still upload. Refused sessions stay queued on the device and upload once uploads are allowed again. See Troubleshooting for what the SDK reports. The server refuses an upload with one of these messages: Message Cause \"This organization has used its plan's sessions plus its -session overage buffer for this billing period. Upgrade your plan, or wait for the next billing period, to resume uploads.\" The period's sessions passed the included sessions plus the buffer. \"This organization's subscription is not active (status: ).\" Payment is overdue or unpaid, billing is paused, or a cancelled plan reached its period end. \"This organization has no active subscription. Uploads are disabled until you subscribe to a plan.\" The organization has never had a plan, or its invite trial ended. The Plan and usage section of the Organization page shows the period's usage against the plan and how much buffer is left."
+        },
+        {
+          "h": "Billing statuses",
+          "a": "billing-statuses",
+          "b": "The Plan and usage section shows the plan's status as a badge: Status Uploads What it means Active Allowed The plan renews on the date shown. On trial Allowed The first payment is on the date shown. Cancelled Allowed until the period ends Recording continues until the period end, then uploads stop. Payment overdue Stopped The last payment didn't go through. Unpaid Stopped Payment didn't go through. Paused Stopped Billing is paused. Ended, Expired Stopped The plan has ended. Choose a plan to record again. When uploads stop, nothing already recorded is deleted."
+        },
+        {
+          "h": "Change or cancel a plan",
+          "a": "change-or-cancel-a-plan",
+          "b": "On the Organization page, click Manage billing to open the billing portal. There you can move up or down a plan, update your payment method, or cancel. A cancelled plan keeps working until the end of the period you paid for. Only the organization's owner sees the Plan section. Deleting the organization cancels its plan first (see Account & Team)."
+        },
+        {
+          "h": "Invite trial",
+          "a": "invite-trial",
+          "b": "An organization created by redeeming an invite can upload for 14 days from the moment the invite was redeemed, with no plan. When the trial ends, uploads stop with the \"no active subscription\" message until the owner chooses a plan. Everything recorded during the trial stays."
+        },
+        {
+          "h": "Retention",
+          "a": "retention",
+          "b": "A recording is deleted 30 days after it reached the server, not 30 days after the device recorded it. The deletion job runs once a day, so a recording can last up to a day past 30 days. Watching a replay doesn't extend it. Retention is the same on every plan and can't be changed. What's deleted after 30 days: The replay and its segments. The session's row in the Sessions list, with its metadata, tags and user ID. What stays: Exceptions, frozen frames and frustration taps, in their own lists. Opening one whose replay is gone reports that the recording is missing. Organizations, client apps, API keys, collaborators, alert rules and uploaded assets. Deleting a client app or an organization removes its recordings at once, without waiting for the 30 days."
+        },
+        {
+          "h": "Keep a session longer",
+          "a": "keep-a-session-longer",
+          "b": "Save it before it's deleted. dart run picto:sessions download writes a session's raw recording bytes to a file, and video and frames render it to an .mp4 or PNG stills. See Sessions CLI & MCP. The following command saves a session's recording to a local file. Add --sequence for a session with more than one segment. dart run picto:sessions download 3f9c2a7e -o 3f9c2a7e.bin"
+        }
+      ]
+    },
+    {
+      "u": "/agents/sessions-cli",
+      "t": "Sessions CLI & MCP",
+      "d": "The picto:sessions CLI and the picto:mcp server.",
+      "g": "Agents & Reference",
+      "s": [
+        {
+          "b": "dart run picto:sessions and dart run picto:mcp give a coding agent read access to your recorded sessions, so it can see what a user did instead of guessing. Both ship in the picto package, so any project that depends on it has them. They read exactly what your account can see in the dashboard, and never change anything."
+        },
+        {
+          "h": "Before you start",
+          "a": "before-you-start",
+          "b": "You need: A project that depends on picto (see Quick Start). A Picto account with a password. An account made from a sign-in link has none: open Account in the dashboard and click Add a password (see Account & Team). An organization with a plan or a running invite trial. Agent access is on every plan."
+        },
+        {
+          "h": "Sign in",
+          "a": "sign-in",
+          "b": "Run login once in a terminal: dart run picto:sessions login It asks for your email and password (the password isn't echoed) and saves the session to ~/.config/picto/credentials.json, readable only by you. $XDG_CONFIG_HOME/picto is used instead when that variable is set. Pass --email to skip the first prompt. --password also exists, but the prompt keeps your password out of your shell history. The saved session renews itself while it's in use, so it lasts as long as a picto:sessions command runs at least once a week. Once it lapses, every command exits with code 3 and says to run dart run picto:sessions login. logout ends the session on the server as well as removing it from your machine: dart run picto:sessions logout For CI, pass --token or set PICTO_TOKEN to use a bearer token instead of the saved session. Nothing is saved or renewed."
+        },
+        {
+          "h": "Commands",
+          "a": "commands",
+          "b": "Every command except login, logout and list takes a session ID, as list prints it. Command What it does list Recent sessions, newest first show One session: its segments, metadata, and every exception, tap cluster and frozen frame with its time in the session timeline Every event in the session in order, each with its session time. No images, so it's the fastest way to read a session. video Renders an .mp4, with a .manifest.json and a .captions.vtt beside it frames Renders PNG stills into a directory, with a manifest.json download Saves one segment's raw recording bytes timeline, video and frames render on Picto's servers and wait for the result, for up to 10 minutes. Rendered files stay on the server for 24 hours."
+        },
+        {
+          "h": "Options for list",
+          "a": "options-for-list",
+          "b": "Option Default Effect --limit 20 Sessions per page --before None The next page. A page that has more prints the cursor (nextBefore in JSON). --has-errors None Only sessions with an exception --has-rage-taps None Only sessions with a rage tap --platform None Only ios, android, macos or web --client-app None Only one client app"
+        },
+        {
+          "h": "Options for timeline, video and frames",
+          "a": "options-for-timeline-video-and-frames",
+          "b": "Option Default Effect --start , --end Whole session A window in session time: 1:03, 63s or 63000 (milliseconds) --keep-idle Off Keep idle stretches (see Idle stretches are cut) --max-width 720 Downscale frames to at most this width --no-pointers Off Don't draw tap ripples video also takes -o, --output (default picto- .mp4) and --fps , 1 to 30 (default 10). frames also takes -o, --output (default picto- -frames), --every for the periodic frames (default 1s), and --no-event-frames to drop the extra frame it otherwise takes at each tap, screen change and error."
+        },
+        {
+          "h": "Options for download",
+          "a": "options-for-download",
+          "b": "download takes -o, --output (default picto- - .bin) and --sequence . A session with more than one segment needs --sequence; without it the command fails with a message listing the segment numbers."
+        },
+        {
+          "h": "Read the output",
+          "a": "read-the-output",
+          "b": "On a terminal the commands print tables and summaries. When stdout isn't a terminal, which is how an agent's shell tool runs them, they print JSON. --json forces JSON anywhere. Failures are JSON too, under an error key with exitCode and message, and the exit code tells an agent what to do next: Exit code Meaning 0 Success 1 Something failed. The message says what, including an hourly limit or a failed render. 2 The command was used wrongly 3 Not signed in, the session expired, or access was refused. Sign in again. 4 No such session, or not one this account can see 5 The session's organization has no plan or invite trial. The error has code: \"plan_required\" and an upgradeUrl. Signing in again won't help; choosing a plan will."
+        },
+        {
+          "h": "Connect the MCP server",
+          "a": "connect-the-mcp-server",
+          "b": "If your agent speaks MCP, dart run picto:mcp offers the same commands as tools, over stdio. It uses the saved sign-in and never asks for a password, so run dart run picto:sessions login in a terminal first. For Claude Code, run this from your app's project directory, the one whose pubspec.yaml depends on picto: claude mcp add picto -- dart run picto:mcp Most other clients read an mcp.json like the following. dart run picto:mcp has to start inside a project that depends on picto, so set cwd to your app's directory: { \"mcpServers\": { \"picto\": { \"command\": \"dart\", \"args\": [\"run\", \"picto:mcp\"], \"cwd\": \"/path/to/your/app\" } } } If your client has no cwd setting, use \"command\": \"sh\" with \"args\": [\"-c\", \"cd /path/to/your/app && dart run picto:mcp\"]. The tools mirror the commands: Tool Same as Parameters list_sessions list limit, before, has_errors, has_rage_taps, platform, client_app_id get_session show session_id get_timeline timeline session_id, start, end, keep_idle render_video video session_id, start, end, keep_idle, output, fps, max_width, pointers render_frames frames session_id, start, end, keep_idle, output, every, event_frames, max_width, pointers, include_images, image_max_widt"
+        },
+        {
+          "h": "Idle stretches are cut",
+          "a": "idle-stretches-are-cut",
+          "b": "timeline, video and frames skip idle stretches by default, the same way the dashboard's Skip idle does: any quiet gap longer than 5 seconds is cut down to its first 5 seconds. The blank stretch before the app's first paint is always cut, even with --keep-idle. Because cuts make output time differ from session time, every render says so: A note on stderr, and as idleNote in the JSON result, says how many stretches were cut and how much time they covered. The manifest lists each cut under idle.skipped with its start, end and reason (idle or before_first_paint), and idle.savedMs totals them. segments maps output time back to session time. Every event in the manifest has a sessionMs and an outputMs. outputMs is null for an event inside a cut. captions.vtt has a cue at each cut, so a model watching the video sees it too. When an agent quotes a time back to you, it should use sessionMs, which matches the dashboard's replay timeline. A render that would be too long, or produce too many frames, fails with a message saying to narrow the window with --start and --end. A window that was entirely idle fails too, and the message says to re-run with --keep-idle."
+        },
+        {
+          "h": "Missing images in a render",
+          "a": "missing-images-in-a-render",
+          "b": "Renders draw your app's bundled images from the assets you uploaded with dart run picto:upload_assets (see Uploading Assets). An image that can't be fetched doesn't fail the render. It's left out, and the manifest lists it under warnings with its reference and a message. video and frames also print a warning: line for each on stderr. When an agent sees an empty space where it expected something, it should check warnings before deciding the app drew nothing there."
+        },
+        {
+          "h": "Example workflow",
+          "a": "example-workflow",
+          "b": "Say a user reports that checkout \"sometimes does nothing\". An agent with a shell can work through it like this: Find sessions where someone hammered a control that didn't respond. dart run picto:sessions list --has-rage-taps --limit 10 Read one session's timeline and find the rage tap. dart run picto:sessions timeline 3f9c2a7e The rage tap is at 1:42. Look at the screen around it. dart run picto:sessions frames 3f9c2a7e --start 1:30 --end 1:50 --every 2s -o frames/ Watch the same window as a video, with taps drawn on. dart run picto:sessions video 3f9c2a7e --start 1:30 --end 1:50 -o checkout.mp4 The timeline is often enough on its own: it shows the screen, the taps before the rage tap and, if the app records network requests, whether the request the button made came back (see What Gets Recorded)."
+        },
+        {
+          "h": "Limits",
+          "a": "limits",
+          "b": "Limits are per organization, per hour, over a sliding window, and rise with the plan: Plan Renders an hour Reads an hour Invite trial 5 300 Starter 5 300 Growth 15 1,000 Scale 30 Unlimited Enterprise 60 Unlimited A render is a timeline, video or frames request. An identical render that's already cached still counts, so reuse finished files. Every other request is a read: list, show, download, and each check on a running render. Over a limit, the request fails with rate_limited and a message naming the plan's limit and how long to wait. On every plan but Enterprise the message includes a link to your organization's billing settings. The CLI exits 1; an MCP tool returns it as the tool's error. list covers every organization you can see: one at its limit is left out and the rest are served."
+        },
+        {
+          "h": "What the agent can see",
+          "a": "what-the-agent-can-see",
+          "b": "The agent sees what your account sees in the dashboard: sessions from organizations you own or collaborate on that have a plan or a running invite trial. list leaves out sessions from other organizations, and opening one of them directly fails with plan_required. A session from anywhere else fails as not found. The agent never sees your API keys."
+        }
+      ]
+    },
+    {
+      "u": "/reference/sdk-api",
+      "t": "SDK API",
+      "d": "Picto, its widgets, and their defaults.",
+      "g": "Agents & Reference",
+      "s": [
+        {
+          "b": "Every public item in package:picto/picto.dart, the only library a Flutter app imports, with its type and default. Each entry links to the guide that explains when to use it. import 'package:picto/picto.dart';"
+        },
+        {
+          "h": "Picto",
+          "a": "picto",
+          "b": "All members are static. There's nothing to construct."
+        },
+        {
+          "h": "Picto.setup",
+          "a": "pictosetup",
+          "b": "Installs the recording binding, the error hooks and the upload queue. Call it once in main(), before runApp() and before anything else initializes a binding. It doesn't start a session. It returns the WidgetsBinding it installed. See Quick start. The signature: static WidgetsBinding setup({ required String apiKey, required String appVersion, Directory? pendingUploadsDir, int samplingPercentage = aotSamplingPercentage, Directory? samplingCacheDir, SamplingRateClient? samplingClient, Duration? maxRecordingDuration, Duration? errorWindowBefore, Duration? errorWindowAfter, Duration? backgroundTimeout, int maxNewSessionsPerHour = defaultMaxNewSessionsPerHour, }) The app below reads its key from a build define it names itself: void main() { Picto.setup( apiKey: const String.fromEnvironment('PICTO_API_KEY'), appVersion: '1.0.0', ); runApp(const MyApp()); } Parameter Type Default Meaning apiKey String Required The client app's API key (oc_...), from the dashboard. appVersion String Required Your app's version, stored on every upload. pendingUploadsDir Directory? picto_pending_uploads in an app-private directory that survives app updates Where a recording waits until it uploads. See How ses"
+        },
+        {
+          "h": "Picto.startRecording",
+          "a": "pictostartrecording",
+          "b": "Starts a session. Does nothing if a session is already recording, if sampling left this run out, or if the install has reached maxNewSessionsPerHour. Called within backgroundTimeout of your own endSessionAndUpload, it continues that session as its next segment. See Recording sessions. static void startRecording() For example: Picto.startRecording();"
+        },
+        {
+          "h": "Picto.endSessionAndUpload",
+          "a": "pictoendsessionandupload",
+          "b": "Ends the session and uploads it. Returns true only when the recording reached Picto; false covers the other three PictoSessionEndOutcome values. metadata is merged into the upload. Throws a StateError if setup was never called. See Recording sessions. static Future endSessionAndUpload({ Map<String, Object?> metadata = const {}, }) For example: final uploaded = await Picto.endSessionAndUpload();"
+        },
+        {
+          "h": "Picto.endSessionAndUploadOutcome",
+          "a": "pictoendsessionanduploadoutcome",
+          "b": "The same call as endSessionAndUpload, returning which of the four outcomes happened. Use it when your app logs or acts on the result. See Recording sessions. static Future endSessionAndUploadOutcome({ Map<String, Object?> metadata = const {}, }) For example: final outcome = await Picto.endSessionAndUploadOutcome();"
+        },
+        {
+          "h": "Picto.restartRecording",
+          "a": "pictorestartrecording",
+          "b": "Ends the live session, uploads it and starts a new session, never a continuation. Returns the outcome of the session that ended, or nothingRecording when nothing was live (a new session still starts). Returns null and changes nothing when sampling left this run out or the install is at maxNewSessionsPerHour. metadata goes on the ending session only. Throws a StateError if setup was never called. See Recording sessions. static Future<PictoSessionEndOutcome?> restartRecording({ Map<String, Object?> metadata = const {}, }) For example: final ended = await Picto.restartRecording();"
+        },
+        {
+          "h": "Picto.isRecording",
+          "a": "pictoisrecording",
+          "b": "true while a session is recording, whether startRecording or an uncaught error started it. See Recording sessions. static bool get isRecording For example: if (!Picto.isRecording) Picto.startRecording();"
+        },
+        {
+          "h": "Picto.isRecordingBindingInstalled",
+          "a": "pictoisrecordingbindinginstalled",
+          "b": "Whether Picto's binding is the live one, so a session captures anything. Always false in a widget test, where setup stands down. See Testing. static bool get isRecordingBindingInstalled For example: expect(Picto.isRecordingBindingInstalled, isFalse);"
+        },
+        {
+          "h": "Picto.retryPendingUploads",
+          "a": "pictoretrypendinguploads",
+          "b": "Sends every queued recording now. You don't need to call it: Picto drains the queue during setup and when the app comes to the foreground, at most once every drainInterval. A call while a drain is running joins that drain. Does nothing in a widget test. Throws a StateError if setup was never called. See How sessions work. static Future retryPendingUploads() For example: unawaited(Picto.retryPendingUploads());"
+        },
+        {
+          "h": "Picto.setTag",
+          "a": "pictosettag",
+          "b": "Sets a tag on the current recording. A later call with the same key replaces the value. Tags don't carry into the next session or segment. See Adding context. static void setTag(String key, String value) For example: Picto.setTag('plan', 'pro');"
+        },
+        {
+          "h": "Picto.identify",
+          "a": "pictoidentify",
+          "b": "Names the user of the current session with your own id. It carries into every later session of the app run. See Adding context. static void identify(String userId) For example: Picto.identify('user-1234');"
+        },
+        {
+          "h": "Picto.recordEvent",
+          "a": "pictorecordevent",
+          "b": "Puts a named event on the replay timeline at this moment. See Adding context. static void recordEvent(String name, {Map<String, String> data = const {}}) For example: Picto.recordEvent('coupon_applied', data: {'code': 'SPRING'});"
+        },
+        {
+          "h": "Picto.navigatorObserver",
+          "a": "pictonavigatorobserver",
+          "b": "Returns a new PictoNavigatorObserver on each read. Add it to navigatorObservers to record screens. See Adding context. static PictoNavigatorObserver get navigatorObserver For example: MaterialApp( navigatorObservers: [Picto.navigatorObserver], home: const HomePage(), );"
+        },
+        {
+          "h": "Picto.recordScreen",
+          "a": "pictorecordscreen",
+          "b": "Records that the user is on the screen name, for screens the Navigator never sees, such as a tab in an IndexedStack or a page of a PageView. Recording the current screen again does nothing. See Adding context. static void recordScreen(String name) For example: Picto.recordScreen('discover');"
+        },
+        {
+          "h": "Picto.defaultMaxNewSessionsPerHour",
+          "a": "pictodefaultmaxnewsessionsperhour",
+          "b": "The default for setup's maxNewSessionsPerHour. static const defaultMaxNewSessionsPerHour = 30;"
+        },
+        {
+          "h": "Picto.drainInterval",
+          "a": "pictodraininterval",
+          "b": "The shortest gap between two automatic drains of the upload queue. static const drainInterval = Duration(minutes: 5);"
+        },
+        {
+          "h": "PictoSessionEndOutcome",
+          "a": "pictosessionendoutcome",
+          "b": "What ending a session did, returned by endSessionAndUploadOutcome and restartRecording. See Recording sessions. Value Meaning uploaded The recording reached Picto. The only value endSessionAndUpload reports as true. uploadFailed The upload didn't land. The recording stays queued on the device and a later drain sends it, unless Picto refused it, which the console reports with the status code. nothingRecording No session was live, so nothing was sent or queued. Not an error: backgrounding and the end of an error window both end sessions on their own. recordingPipelineAbsent Picto's binding isn't installed, so nothing was captured or sent. The session still ends. Expected in widget and integration_test runs. The switch below handles each value: switch (await Picto.endSessionAndUploadOutcome()) { case PictoSessionEndOutcome.uploaded: debugPrint('uploaded'); case PictoSessionEndOutcome.uploadFailed: debugPrint('queued, will retry'); case PictoSessionEndOutcome.nothingRecording: debugPrint('no session was live'); case PictoSessionEndOutcome.recordingPipelineAbsent: debugPrint('not recording under test'); }"
+        },
+        {
+          "h": "Widgets",
+          "a": "widgets",
+          "b": "Each widget changes only what's recorded beneath it. Your app draws exactly as before. See What gets recorded."
+        },
+        {
+          "h": "CaptureText",
+          "a": "capturetext",
+          "b": "Sets whether text beneath child is captured. Text is captured by default, so enabled: false is the common use: it replaces every paragraph, icons included, with line-box placeholders. The innermost CaptureText wins. overflowPadding is the logical-pixel margin kept around each paragraph for shadows and overhang; null means a quarter of the paragraph's tallest line. It must be zero or more and finite. const CaptureText({ Key? key, required Widget child, bool enabled = true, double? overflowPadding, }) For example: CaptureText(enabled: false, child: AccountDetails());"
+        },
+        {
+          "h": "CaptureRealImages",
+          "a": "capturerealimages",
+          "b": "Records the real pixels of images beneath child, within a per-session size budget, instead of placeholders. const CaptureRealImages({Key? key, required Widget child}) For example: CaptureRealImages(child: ProductPhoto());"
+        },
+        {
+          "h": "CaptureVectorGraphics",
+          "a": "capturevectorgraphics",
+          "b": "Records an SVG, Lottie or Rive graphic beneath child as a compact raster. Wrap it tightly around the graphic. const CaptureVectorGraphics({Key? key, required Widget child}) For example: CaptureVectorGraphics(child: BrandLogo());"
+        },
+        {
+          "h": "CapturePlatformView",
+          "a": "captureplatformview",
+          "b": "Records a native view, such as a map, from images it takes of itself. snapshot returns encoded image bytes, or null when there's nothing to show yet. Picto asks about once a second while the view is on screen, scales each image to 512 px on its longest edge and stops after 1 MiB per session. Nothing is captured under a text mask or ExcludeFromRecording. const CapturePlatformView({ Key? key, required Future<Uint8List?> Function() snapshot, required Widget child, }) For example: CapturePlatformView( snapshot: () async => mapController?.snapshot(), child: MapView(onCreated: (controller) => mapController = controller), );"
+        },
+        {
+          "h": "ExcludeFromRecording",
+          "a": "excludefromrecording",
+          "b": "Keeps everything beneath child out of the recording, including its position and size. const ExcludeFromRecording({Key? key, required Widget child}) For example: ExcludeFromRecording(child: PaymentForm());"
+        },
+        {
+          "h": "PictoHttpClient",
+          "a": "pictohttpclient",
+          "b": "An http.Client that records each request's method, URL, status code and duration. Headers and bodies are never recorded, nor is a user:password@ part of the URL. With redactQueryParameters set to true, the recorded URL also drops its query string and fragment. Requests are sent unchanged. See What gets recorded. PictoHttpClient(http.Client inner, {bool redactQueryParameters = true}) For example: final client = PictoHttpClient(http.Client());"
+        },
+        {
+          "h": "PictoNavigatorObserver",
+          "a": "pictonavigatorobserver",
+          "b": "The NavigatorObserver behind Picto.navigatorObserver, which is the usual way to get one. A screen is named by its RouteSettings.name. An unnamed route is recorded by its type, and a dialog, sheet or menu only when you name it with routeSettings. All instances share one current screen, so two can't record the same change twice. See Adding context. PictoNavigatorObserver() For example: MaterialApp(navigatorObservers: [PictoNavigatorObserver()], home: const HomePage());"
+        },
+        {
+          "h": "PICTO_SAMPLING_PERCENTAGE",
+          "a": "picto_sampling_percentage",
+          "b": "A build define Picto reads: the share of app runs this build records, 100 by default. It's the default for setup's samplingPercentage and applies until the server's rate for the app arrives; a rate set in the dashboard replaces it. See Sampling. flutter build apk --dart-define=PICTO_SAMPLING_PERCENTAGE=25"
+        }
+      ]
+    }
+  ]
+}
